@@ -1,0 +1,25 @@
+# jemdoc: menu{MENU}{index.html}, nofooter  
+==Achraf Azize
+
+~~~
+{}{img_left}{linkedin_azize.jpeg}{alt text}{220}{220}
+PhD Student,\n [https://team.inria.fr/scool/ Scool (Inria Lille)], \n[https://www.univ-lille.fr/ Université de Lille]\n
+Phone: \+33 6 98 26 25 57 \n
+e-mail: achraf.azize@inria.fr
+~~~
+
+== About me
+I am a PhD student in the Scool team (previously SequeL) at Inria Lille (France) under the supervision of [https://debabrota-basu.github.io/ Debabrota Basu] and [https://philippe-preux.github.io/ Philippe Preux]. 
+I am exploring privacy presering machine learning in the online setting.
+Prior to my PhD, I graduated from École Polytechnique and ENS Paris-Saclay.  
+
+== Interests
+My research interests include:
+- Differential Privacy 
+- Multi-armed Bandits
+- Reinforcement Learning
+- Online Learning
+
+
+[Achraf_s_Resume.pdf A brief cv]
+
