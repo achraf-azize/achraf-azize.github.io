@@ -10,6 +10,9 @@ For published articles, visit my [ [https://scholar.google.com/citations?user=9R
   A. Azize and D. Basu, When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits. Primary version: Accepted in [https://ewrl.wordpress.com/ewrl15-2022/ EWRL2022]. In Proc. [ [https://arxiv.org/abs/2209.02570/] Neurips2022 ] \n
   A. Azize and O. Gaizi, Conservative Optimistic Policy Optimization via Multiple Importance Sampling, [ [https://arxiv.org/abs/2103.03307/ arxiv] ]
   
+== Open Problems
+  Better privacy guarantees for larger groups, ([Open_problem_Better_privacy_guarantees_for_larger_groups.pdf PDF])
+  
 
 == Thesis
   A. Azize, Multi-Object Manipulation using Relational Reinforcement Learning, Msc Thesis, [ [https://github.com/achraf-azize/InstaDeep_Internship/blob/main/AZIZE%20ACHRAF%20RAPPORT.pdf/ report] ]
