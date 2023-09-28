@@ -6,7 +6,9 @@ Here is a full list of my publications, thesis and project reports. \n
 For published articles, visit my [ [https://scholar.google.com/citations?user=9RKFStAAAAAJ&hl=fr&oi=ao/] scholar ] page. 
 
 == Publication
-  A. Azize and D. Basu, Rényi Diffrentially Private Bandits. In [https://aaai-ppai23.github.io/ PPAI@AAAI], 2023 ([Renyi_DP_Bandits.pdf PDF]). \n
+  A. Azize, M. Jourdan, A. Al Marjani, and D. Basu. On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence. Primary version: Accepted in [https://ewrl.wordpress.com/ewrl16-2023/ EWRL2023]. In Proc. [ [https://arxiv.org/abs/2309.02202] Neurips2023 ] \n
+  A. Azize and D. Basu, Interactive and Concentrated Differential Privacy for Bandits. In [https://ewrl.wordpress.com/ewrl16-2023/ EWRL2023] \n
+  A. Azize and D. Basu, Rényi Differentially Private Bandits. In [https://aaai-ppai23.github.io/ PPAI@AAAI], 2023 ([Renyi_DP_Bandits.pdf PDF]) \n
   A. Azize and D. Basu, When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits. Primary version: Accepted in [https://ewrl.wordpress.com/ewrl15-2022/ EWRL2022]. In Proc. [ [https://arxiv.org/abs/2209.02570/] Neurips2022 ] \n
   A. Azize and O. Gaizi, Conservative Optimistic Policy Optimization via Multiple Importance Sampling, [ [https://arxiv.org/abs/2103.03307/ arxiv] ]
   
