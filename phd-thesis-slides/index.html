@@ -1,0 +1,1380 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>Privacy-Utility Trade-offs in Sequential Decision-Making under Uncertainty </title>
+
+		<link rel="stylesheet" href="dist/reset.css">
+		<link rel="stylesheet" href="dist/reveal.css">
+		<!-- <link rel="stylesheet" href="dist/theme/serif.css" id="theme"> -->
+		<link rel="stylesheet" href="dist/theme/indigo.css" id="theme">
+		<link rel="stylesheet" href="css/custom.css">
+
+		<!-- Theme used for syntax highlighted code -->
+		<link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+
+
+				<!-- First Slide - Title, Author, Topic -->
+				<section data-background="white">
+					<section>
+					<header><h4 style="font-size:1.2em">
+						Privacy-Utility Trade-offs in Sequential<br> 
+						Decision-Making under Uncertainty</h4></header>
+					<p class="authors" style="font-size:0.8em"> 
+						<a href="https://achraf-azize.github.io/">Achraf Azize</a>
+					<p class="authors" style="font-size:0.5em"> 
+						Supervised by
+						<a href="https://debabrota-basu.github.io/">Debabrota Basu</a>
+						and 
+						<a href="https://philippe-preux.github.io/">Philippe Preux</a>
+					</p>
+					<br>
+					<footer>
+						<img data-src="images/ulille.png" height="75">
+						<img data-src="images/inria.png" height="75">
+						<img data-src="images/cristal.svg" height="75">
+					</footer>
+					</section>
+
+					<section>
+						<header><h3>Jury Members</h3></header>
+						<img style="vertical-align:middle" height="500" data-src="images/jury2.svg">
+					</section>
+				</section>
+
+				<!-- 
+
+					Context & Motivation 
+
+				-->
+				<section>
+					<!-- Header  -->
+					<section>
+						<header><h3>Context & Motivation</h3></header>
+						<br>
+						<span class="smalltext">Privacy in Bandits</span>
+					</section>
+
+					<section>
+						<header><h3>Sequential Decision-Making</h3></header>
+						<br>
+						<ul>
+							<li>Make decisions based on data interactively
+							<li class="fragment">
+								Data is sensitive and detailed
+							</li>
+							<li class="fragment">
+								Multi-armed Bandits under Differential Privacy
+							</li>
+						</ul>
+					</section>
+
+					<section>
+						<header><h3>Multi-armed Bandits</h3></header>
+						<br>
+						<img style="vertical-align:middle" height="200" data-src="images/mab_white.svg">
+						<br>
+						<ul>
+							<li>Learner interacts with an unkonwn environment </li>
+							<li>Goal: maximize rewards</li>
+						</ul>
+						<!-- <span class="myfootnote">
+							<ul>
+								 [1] W. R. Thompson.   
+									<b>On the likelihood that one unknown probability exceeds another in view of the evidence of two samples.</b>
+									(Biometrika 1933).
+							</ul>
+						</span> -->
+					</section>
+
+
+					<section data-background="#dddddd">
+						<header><h3>Example: Clinical trials [1]</h3></header>
+						<br>
+						<!-- <img style="vertical-align:middle" height="200" data-src="images/rl_example.svg"> -->
+						<img style="vertical-align:middle" height="200" data-src="images/medicine_bandit.svg">
+						<br>
+						<p> For the $t$-th patient</p>
+						<ol>
+							<li> Doctor choses medicine $a_t \in \{1, \dots, K\}$</li>
+							<li> If Patient $t$ is cured $r_t = 1$, otherwise $r_t = 0$
+						</ol>
+						<span class="myfootnote">
+							<ul>
+								 [1] W. R. Thompson.   
+									<b>On the likelihood that one unknown probability exceeds another in view of the evidence of two samples</b>
+									(Biometrika 1933).
+							</ul>
+						</span>
+					</section>
+					<section style="font-size: 35px;"> 
+						<header><h3>Challenge</h3></header>
+						<br>
+						<ul>
+							<li> Protect the privacy of the patients</li>
+							<li  class="fragment"> Other
+								applications: recommender systems, online advertisement, user studies  </li>
+							<!-- <li  class="fragment"> Counterfactual: what can a malicious adversary do? </li> -->
+						</ul>
+						<br>
+						<br>
+						<span class="fragment">
+							<b>Main Question:</b> What is the cost af achieving privacy in bandits?
+							</span>
+					</section>
+
+					<section data-background="#dddddd" style="font-size: 32px;">
+						<header><h3>Differential Privacy [1]</h3></header>
+						<br>
+						<b> Intuition:</b> Indistinguishability from the mass
+						<img style="vertical-align:middle" height="280" data-src="images/dp_intuition_small.svg">
+						<br>
+						<span class="fragment">
+						<span class="theorem">
+						 $\mathcal{M}$ is $\epsilon$-DP if 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{F}, \,  \mathcal{M}_{d}(E) \leq e^\epsilon\mathcal{M}_{d'}(E)
+							$$
+						</span>
+						</span>
+						<span class="myfootnote">
+							<ul>
+								 [1] C.Dwork, F.McSherry, K.Nissim, A.Smith.  
+									<b>Calibrating noise to sensitivity in private data analysis</b>
+									(TCC 2006).
+							</ul>
+						</span>
+					</section>
+
+					<section data-background="white" style="font-size: 32px;">
+						<header><h3>Differential Privacy</h3></header>
+
+						Several Current Deployments
+						<img style="vertical-align:middle" height="300" data-src="images/dp_dep.svg">
+
+						<span class="fragment">
+						<br>
+						<b> Privacy Auditing:</b> How to certify privacy/estimate the privacy budget? 
+						</span>
+					</section>
+					
+					<section data-background="white" style="font-size: 30px;">
+						<header><h3>Privacy Auditing</h3></header>
+						<header><h5> using Membership Attacks</h5></header>
+						<img style="vertical-align:middle" height="500" data-src="images/dp_audit.svg">
+						<br>
+						<span class="fragment">
+						<b>Main Questions:</b> How to design canaries? How to design optimal attacks?
+						</span>
+					</section>
+
+					<section>
+						<header><h3>Outline</h3></header>
+						<br>
+						<ol>
+							<li>Definitions: privacy and utility in bandits</li>
+							<li class="fragment">Lower bounds: what is the best utility achievable?</li>
+							<li class="fragment">Algorithm design: how to achieve the best utility?</li>
+							<li class="fragment">Revisiting Membership Inference Games</li>
+						</ol>
+					</section>
+				</section>  <!-- end of context & motivation-->
+
+
+				<!-- 
+
+					Definitions
+
+				-->
+				<section>
+					<!-- Header  -->
+					<section>
+						<header><h3> Definitions </h3></header>
+						<br>
+						<span class="smalltext">
+							Bandits: Utility & Privacy
+						</span>
+					</section>
+
+					
+					<section>
+						<header><h3>Stochastic Bandit Interaction</h3></header>
+						<br>
+						Sequential interaction between:
+						<ul>
+							<li> a policy $\pi = (\pi_t)_t$ </li>
+							<li> an environment $\nu = (P_a)_{a \in [K]}$, with means $\mu(\nu) = (\mu_a(\nu))_{a \in [K]}$</li>
+						</ul>
+						<br>
+						<br>
+						<span class="fragment">
+						<span class="theorem">
+						At step $t$
+						<br>
+						<ol>
+							<li> $a_t \sim \pi_t(. \mid a_1, r_1, \dots, a_{t-1}, r_{t-1})$</li>
+							<li> $r_t \sim P_{a_t}$
+						</ol>
+						</span>
+						</span>
+					</section>
+
+					<section>
+						<header><h3>Two Utility Objectives</h3></header>
+						<br>
+						<b>(a) Regret minimisation:</b> Given a horizon $T$, minimise 
+						<span class="fragment">
+							$$\mathrm{Reg}_{T}(\pi, \nu) \triangleq T \mu^\star(\nu)-\mathbb{E}_{\nu \pi}\left[\sum_{t=1}^{T} r_{t}\right]$$
+							where $\mu^\star(\nu) \triangleq \max\limits_{a \in [K]} \mu_a(\nu)$
+						</span>
+					</section>
+					
+					<section>
+						<header><h3>Two Utility Objectives</h3></header>
+						<br>
+						<b>(b) Best-arm Identification:</b> Find the optimal arm 
+						$a^\star(\nu) \triangleq \arg\max\limits_{a \in [K]} \mu_a(\nu)$
+						<br>
+						
+						<br>
+						<span class="fragment">
+						Fixed Confidence: Minimise the number of samples used to identify $a^\star(\nu)$ with confidence $1 - \delta \in (0,1)$
+						</span>
+					</section>
+
+					<section>
+						<header><h3>Best-arm Identification</h3></header>
+						<br>
+						<ol> 
+							<li>Stop the bandit interaction at time $\tau$</li> 
+							<li>Recommend a final guess $\widehat{a} \in [K]$</li>
+						<br>
+						<span class="fragment">
+						<span class="theorem">
+							<b>Definition: </b>A strategy is $\delta$-correct for a class $\mathcal{M}$, if
+
+						$$ \mathbb{P}_{\nu, \pi} ( \tau < \infty, \widehat{a} = a^\star(\nu) ) \geq 1 - \delta$$
+						for every environment $\nu \in \mathcal{M}$
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+							<span style="text-align: left; ; font-size: 35px;">
+							<b >Goal:</b> Design a $\delta$-correct strategy, with the smallest $\mathbb{E}_{\pi, \nu} [\tau]$
+						</span>
+						</span>
+					</span>
+						
+					</section>
+
+					<section>
+						<header><h3>Two Utility Objectives</h3></header>
+						<br>
+						<b>(a) Regret minimisation: </b> Minimise $\mathrm{Reg}_{T}(\pi, \nu)$
+						<br>
+						<b>(b) FC-BAI: </b> Minimise $\mathbb{E}_{\pi, \nu} [\tau]$ for $\delta$-correct strategies
+					</section>
+
+					<section data-background="#dddddd">
+						<header><h3>Bandits with DP</h3></header>
+						<br>
+						<b>Privacy Constraint:</b> Rewards may contain sensitive information about individuals. 
+						<span class="fragment">
+						<img style="vertical-align:middle" height="180" data-src="images/dp_mec.svg">
+						<br>
+						Ingredients to specify:
+						<br>
+						<ul>
+							<li>The randomized mechanism</li>
+							<li>The private input dataset </li>
+							<li>The output </li>
+						</ul>
+					</span>
+					</section>
+
+					<section data-background="#dddddd" >
+						<header><h3>Table DP</h3></header>
+						<br>
+						<b >Definition:</b> $\pi$ satisfies $\epsilon$-Table DP if $\mathcal{M}^\pi$ is $\epsilon$-DP
+						<img style="float:right" height="450" data-src="images/table_dp_math_plus.svg">
+					</span>
+					</section>
+
+					<section data-background="#dddddd">
+						<header><h3>View DP</h3></header>
+						<br>
+						<b>Definition:</b> $\pi$ satisfies $\epsilon$-View DP if $\mathcal{V}^\pi$ is $\epsilon$-DP
+						<br>
+						<img style="vertical-align:middle;margin:0px 270px" height="450" data-src="images/view_dp_maths_plus.svg">
+
+					</span>
+					</section>
+
+					<section>
+						<header><h3>Comments on the Definitions [$\ast$]</h3></header>
+						<br>
+						<ul>
+							<li> $\pi$ is $\epsilon$-Table DP $ \Leftrightarrow $ $\pi$ is $\epsilon$-View DP</li>
+							<li class="fragment"> For other variants of DP: Table DP $\subset$ View DP</li>
+							<li class="fragment"> For BAI: infinite inputs, output $\{\tau, (a_1, \dots, a_\tau ), \hat{a}\}$</li>
+							<li class="fragment"> Interactive DP: rewards are chosen sequentially by an adaptive adversary</li>
+						</ul>
+						<br>
+						<br>
+						<br>
+						<span class="myfootnote" style="font-size: 17px;">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b>Concentrated Differential Privacy for Bandits</b> (SaTML 2023)
+						</span>
+					</section>
+
+					<section>
+						<header><h3>Objectives</h3></header>
+						<header><h5>Recap</h5></header>
+						<br>
+						<ul>
+							<li> Design an <b>$\epsilon$-DP</b> policy $\pi$ that minimises $\mathrm{Reg}_{T}(\pi, \nu)$ </li>
+							<li> Design an <b>$\epsilon$-DP</b>  <b class="blue">$\delta$-correct</b> strategy $\pi$ that minimises $\mathbb{E}_{\pi, \nu} [\tau]$ </li>
+						</ul>
+					</section>
+
+				</section>
+				<!-- 
+
+					Lower bounds
+
+				-->
+				<section>
+					<!-- Header  -->
+					<section>
+						<header><h3> Lower Bounds </h3></header>
+					</section>
+			
+					
+					<section>
+						<header><h3>Regret Lower Bound</h3></header>
+						<br>
+						<span class="horizental-align:middle">
+						<span class="theorem" style="text-align: left; font-size: 30px;">
+							<b class="blue2">Theorem. </b> For any $\epsilon$-DP policy $\pi$ consistent over a class of environments $\mathcal{M}$
+							$$
+							 \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\min \biggl( \underset{\text{without DP}}{\underbrace{\textrm{KL}_\textrm{inf}\left(P_{a}, \mu^\star, \mathcal{M}_a\right)}}, \underset{\text{with $\epsilon$-DP}}{\underbrace{\epsilon \, \textrm{TV}_\textrm{inf}\left(P_{a}, \mu^\star, \mathcal{M}_a\right)}} \biggl)}
+							$$
+							where $\Delta_a \triangleq \mu^\star - \mu_a$ 
+							and $$\textrm{d}_\textrm{inf} (P, \mu^\star, \mathcal{M}) \triangleq \inf_{P' \in \mathcal{M}} \left\{ \textrm{d}(P, P'): \mu(P') > \mu^\star \right\}$$
+						</span>
+					</span>
+						<br>
+						<span class="myfootnote">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022).
+						</span>
+
+					</section>
+
+					<section style="font-size: 25px;">
+						<header><h3>Regret Lower Bound</h3></header>
+						<header><h5>Simplification and Comments</h5></header>
+						<br>
+						<span class="theorem" style="text-align: left; font-size: 25px;">
+						$$
+							 \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\min \biggl( d_a, \epsilon t_a \biggl)}
+						$$
+						</span>
+						
+						<span class="r-stack">
+						<span class="fragment current-visible" data-fragment-index="1">
+							<br>
+							<br>
+							<ul>
+								<li> $d_a \approx \Delta_a^2$ and $t_a \approx \Delta_a$, the lower bound simplifies to $$\Omega\left(\sum_a \frac{\log(T)}{\min\{ \Delta_a, \epsilon\}}\right)$$</li>
+								and retrieves the known lower bound for private Bernouli bandits [1]</li>
+								
+							</ul>
+							<br>
+							<br>
+	
+							<span class="myfootnote" style="font-size: 19px;">
+								 [1] R. Shariff, O. Sheffet. <b>Differentially Private Contextual Linear Bandits </b> (NeurIPS 2018).
+							</span>
+						</span>
+						
+						
+						<span class="fragment current-visible" data-fragment-index="2"> 
+							<ul>
+								<li> Two hardness regimes: </li>
+								
+								<ul>
+									<li> A low privacy regime when $\epsilon > \frac{d_a}{t_a} \approx \Delta_a$: non-private lower bound is dominant</li>
+									<br>
+									<li> A high privacy regime when $\epsilon \leq \frac{d_a}{t_a}\approx \Delta_a$: private lower bound is dominant</li>
+								</ul>
+							</ul>
+						</span>
+					</span>
+
+					</section>
+
+					<section>
+						<header><h3>Sample Complexity Lower Bound</h3></header>
+						<br>
+						<span class="horizental-align:middle">
+						<span class="theorem" style="text-align: left; font-size: 35px;">
+							<b class="blue2">Theorem. </b> For any $\epsilon$-DP $\delta$-correct strategy $\pi$
+							$$
+							\mathbb{E}_{\boldsymbol{\nu}, \pi}[\tau] \geq \max\big( \underset{\text{without DP}}{\underbrace{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}}, \underset{\text{with $\epsilon$-DP}}{\underbrace{\frac{1}{\epsilon}  T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}}\big) \log \left( \frac{1}{3 \delta}\right)
+							$$
+							where $\left(T^{\star}_{\textbf{d}}(\boldsymbol{\nu}) \right)^{-1} \triangleq \sup _{\omega \in \Sigma_K} \inf _{\boldsymbol{\lambda} \in \operatorname{Alt}(\boldsymbol{\nu})}  \sum_{a=1}^K \omega_a \textbf{d}(\nu_a, \lambda_a)$.
+						</span>
+					</span>
+						<br>
+						<br>
+						<span class="myfootnote">
+							[$\ast$] <span class="blue2">A. Azize</span>, M. Jourdan, A. Marjani, D. Basu.
+									<b>On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence</b> (NeurIPS 2023).
+						</span>
+
+					</section>
+
+				
+
+				<section style="font-size: 25px;">
+					<header><h3>Sample Complexity Lower Bound</h3></header>
+					<header><h5>Simplification and Comments</h5></header>
+					<br>
+					<span class="theorem" style="text-align: left; font-size: 25px;">
+						$$
+						\mathbb{E}_{\boldsymbol{\nu}, \pi}[\tau] \geq \max\big( T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu}), \frac{1}{\epsilon}  T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})\big) \log \left( \frac{1}{3 \delta}\right)
+						$$
+					</span>
+					
+						<br>
+						<br>
+						<ul>
+							<li > $T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu}) \approx \sum_{a} \frac{1}{\Delta_a^2}$ and  $T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu}) \approx \sum_{a} \frac{1}{\Delta_a}$ </li>
+							<br>
+							<span class="fragment">
+							<li > Two hardness regimes: </li>
+								
+								<ul>
+									<li> A low privacy regime when $\epsilon > \frac{T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}$: non-private lower bound is dominant</li>
+									<br>
+									<li> A high privacy regime when $\epsilon \leq \frac{T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}$: private lower bound is dominant</li>
+								</ul>
+							</span>
+						</ul>
+					
+				
+
+					</section>
+
+					<section style="font-size: 35px;">
+						<header><h3>Lower Bound Proof</b></h3></header>
+						<br>
+						<ul>
+							<li>Reduction to hypothesis testing</li>
+							<br>
+							<span class="fragment">
+							<li >Construct two bandit environments that are conflicting:</li>
+							<ul>
+								<li> Actions that are good for one environment are bad for the other </li>
+								<li>The two environments are hard to distinguish </li>
+							</ul>
+							</span>
+							
+						</ul>
+						<br>
+						<br>
+						<p class="fragment"> Additional source of stabilty: How does the DP constraint translate in terms of stochastic bounds on "similarity"?</p>
+					</section>
+
+					<section data-background="#dddddd" style="font-size: 30px;">
+						<header><h3>Group Privacy</h3></header>
+						<img style="vertical-align:middle" height="180" data-src="images/dp_mec.svg">
+						<br>
+						<span class="theorem" style="text-align: left;">
+							<b class="blue2"> Theorem. </b> If $\mathcal{M}$ is $\epsilon$-DP, for any event $E$, and any datasets $d$ and $d'$
+							$$
+							\mathcal{M}_{d}(E) \leq e^ {\epsilon d_{\mathrm{Ham}}(d, d')} \mathcal{M}_{d'}(E)
+							$$
+							where $d_{\mathrm{Ham}}(d, d') \triangleq \sum_{t=1}^T \mathbb{1}\left(d_t \neq d'_t\right)$.
+							<br>
+							<br>
+							<span class="fragment">
+							<b class="blue2"> Consequence. </b> $\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon d_{\mathrm{Ham}}(d, d') $
+						</span>
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<b>Question:</b> What happens when $d$ and $d'$ are stochastically generated?
+						</span>
+					</section>
+
+					<section style="font-size: 30px;">
+						<header><h3>Stochastic Group Privacy</h3></header>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							<b class="blue2"> Definition. </b> Let $\mathbb{P}$ be a distribution over $\mathcal{X}^T$, and $E$ an output event.
+
+						We define the marginal over the output of mechanism $\mathcal{M}$
+						$$
+						M^\mathbb{P} (E) \triangleq \int_{d \in \mathcal{X}^T } \mathcal{M}_d\left(E \right) \mathrm{d}\mathbb{P} \left(d\right),
+						$$
+						when the input dataset is generated using $\mathbb{P}$.
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<b>Question:</b> For two distributions $\mathbb{P}$ and $\mathbb{Q}$, how to control the quanitity $\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right)$?
+						</span>
+					</section>
+
+
+					<section data-background="#dddddd" style="font-size: 30px;">
+						<header><h3>First Attempt</h3></header>
+						<header><h5>Data-processing Inequality</h5></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 350px" height="300" data-src="images/data_proc_cent.svg">
+						<br>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							$$
+							\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \mathrm{KL}\left(\mathbb{P}, \mathbb{Q} \right)
+							$$
+						</span>
+					</section>
+
+					<section data-background="#dddddd" style="font-size: 30px;">
+						<header><h3>Second Attempt</h3></header>
+						<header><h5>Couplings</h5></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 1px" height="300" data-src="images/coupling.svg">
+						<br>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							$$
+							\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+							$$
+						</span>
+					</section>
+
+					<section style="font-size: 30px;">
+						<header><h3>Couplings and Group Privacy </h3></header>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							$$
+							\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+							$$
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						If $\mathcal{M}$ is $\epsilon$-DP, then $$\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon d_{\mathrm{Ham}}(d, d')$$
+						</span>
+						<br>
+						<span class="fragment">
+						Solve the transport problem
+						<br>
+						<span class="theorem" style="text-align: left;">
+							$$
+							\inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ d_{\mathrm{Ham}}(d, d') \right]
+							$$
+						</span>
+					</span>
+					</section>
+
+					<section style="font-size: 30px;">
+						<header><h3>Couplings and Total Variation </h3></header>
+						<header><h5>Product Distributions</h5></header>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							Let $\mathbb{P}$ and $\mathbb{Q}$ two distributions with the same $\sigma$-algebra. There exists a coupling $c_\infty(\mathbb{P}, \mathbb{Q})$ such that 
+    					$$
+ 						\mathbb{E}_{(X, Y) \sim c_\infty(\mathbb{P}, \mathbb{Q})}\left[\mathbb{1}\left (X \neq Y\right)\right] = \mathrm{TV}\left(\mathbb{P}, \mathbb{Q}\right)
+    					$$
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<span class="theorem" style="text-align: left;">
+							When $\mathbb{P} =\bigotimes_{t = 1}^T \mathbb{P}_{t} $ and $\mathbb{Q} =\bigotimes_{t = 1}^T \mathbb{Q}_{t}$, then by using the maximal coupling $\mathcal{C}_\infty \triangleq \bigotimes_{t = 1}^T c_\infty\left(\mathbb{P}_t, \mathbb{Q}_t\right)$, we get
+							$$
+							\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \epsilon \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right)
+							$$
+						</span>
+					</span>
+					</section>
+
+					<section style="font-size: 30px;">
+						<header><h3>Couplings and Total Variation </h3></header>
+						<header><h5>Bandit Interaction</h5></header>
+						<br>
+						<span class="theorem" style="text-align: left;">
+							<b class="blue2"> Theorem.</b>[$\ast$] Let $\mathbb{M}_{\nu \pi}$ be the marginal over sequence of actions, when $\pi$ interacts with $\nu$. Then, for any to environments $\nu = (P_a)_{a \in [K]}$ and $\nu' = (P'_a)_{a \in [K]}$
+    					$$
+						\mathrm{KL}\left(\mathbb{M}_{\nu \pi}, \mathbb{M}_{\nu' \pi} \right) \leq \epsilon \mathbb{E}_{\nu \pi} \left[ \sum_{t = 1}^T \mathrm{TV} \left(P_{a_t}, P'_{a_t}\right) \right]
+    					$$
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<p style="text-align: left;"><b>Proof.</b> Construct a maximal "coupled environment"</p>
+						</span>
+						<br>
+						<span class="myfootnote" style="font-size: 17px;">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b>Concentrated Differential Privacy for Bandits</b> (SaTML 2023)
+						</span>
+
+					</section>
+
+					<section style="font-size: 32px;">
+						<header><h3>Retrieving the Lower bounds</h3></header>
+						<br>
+						<p style="text-align: left;"> Plugging the KL upper bound into classic lower bound proof, we generate: </p>
+						<ul>
+							<li> Minimax and problem-dependent regret lower bounds</li>
+							<br>
+							<li> Sample complexity lower bound</li>
+							<br>
+							<li> Linear bandits regret lower bounds</li>
+							<br>
+							<li> Generatlisation to $\rho$-zCDP</li>
+						</ul>
+					</section>
+					
+					<section style="font-size: 35px;">
+						<header><h3>Lower Bounds</h3></header>
+						<header><h5>Recap</h5></header>
+						<br>
+						<ul>
+							<li>Regret lower bounds for $\epsilon$-DP consistent policies is $$\Omega\left(\sum_a \frac{\log(T)}{\min\{ \Delta_a, \epsilon\}}\right)$$</li>
+							
+							<li>Sample complexity lower bound for $\delta$-correct $\epsilon$-DP strategies is $$\Omega\left(\max\left\{ T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu}), \frac{1}{\epsilon}  T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})\right\} \log \left( \frac{1}{ \delta}\right)\right)$$</li>
+						</ul>
+					</section>
+
+				</section> <!-- end of lower bounds -->
+
+				<!-- 
+
+					Algorithm Design
+
+				-->
+				<section>
+					<!-- Header  -->
+					<section>
+						<header><h3> Algorithm Design </h3></header>
+					</section>
+	
+					<section style="font-size: 30px;">
+						<header><h3>Generic Recipe</h3></header>
+						<p style="text-align: left;"> To make a bandit policy achieve privacy: </p>
+						<ol>
+							<li class="fragment"> Characterise a sequence of "sufficient" statistics</li>
+							<ul>
+								<span class="fragment">
+								<li>
+									The sequence of empirical means $(\hat \mu_{a}(t))_{t,a}$
+								</li>
+								<li>
+									The sequence of empirical estimates $(\hat \theta_t)_t$ in linear bandits
+								</li>
+								</span>
+							</ul>
+							<br>
+							<li class="fragment"> Estimate the sequence of "sufficient" statistics privately by:</li>
+							<ul>
+								<span class="fragment">
+								<li> Adding calibrated noise </li>
+								<li> Run the algorithm in phases, with forgetting</li>
+							</span>
+							</ul>
+							<br>
+							<li class="fragment"> Calibrate for the noise addition in the algorithm </li>
+							<ul>
+								<span class="fragment">
+								<li>
+									Re-calibrate the bonus in optimistic algorithms
+								</li>
+								<li>
+									Explore arms longer in the elimination-based algorithms
+								</li>
+								<li>
+									Re-calibrate the stopping time thresholds in BAI
+								</li>
+							</span>
+							</ul>
+							
+
+						</ol>
+					</section>
+
+					<section style="font-size: 30px;">
+						<aside class="notes">
+							In Kernel-Based RL, we use the similarity
+							function to estimate a model of the MDP,
+							that can be used later to compute a policy.
+							The model estimation technique is
+							very similar to non-parametric kernel
+							regression.
+						</aside>
+						<header><h3>Finite-armed Stochastic Bandits</h3></header>
+						<header><h5>The UCB Algorithm</h5></header>
+						<br>
+						<span class="theorem"> At step $t$, UCB choses the arm $A_{t} \in \operatorname{argmax}\limits_{a \in [K]} I_a(t-1)$</span>
+						<br>
+						<p style="text-align: left;">
+						where
+						$
+						I_a(t-1) = \hat{\mu}_a(t - 1) + b_a(t - 1)
+						$
+						and $b_a(t-1) \sim \sqrt{\frac{\log(t)}{2 N_a(t - 1)}}$
+						</p>
+						<br>
+						<span class="fragment">
+						<span class="theorem">
+							<b class="blue2"> Theorem.</b> $\mathrm{Reg}_{T}(\mathrm{UCB}, \nu) \leq C \sum_{a: \Delta_a > 0} \frac{ \log(T)}{\Delta_a}$
+						</span>
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<b>Question:</b> How to design a near-optimal $\epsilon$-DP version of UCB?
+						</span>
+					</section>
+
+
+					<section data-background="#dddddd" style="font-size: 23px;">
+						<header><h3>AdaP-UCB[$\ast$]</h3></header>
+						<aside class="notes">
+							As an online version of kernel-based RL,
+							we propose an algorithm called Kernel-UCBVI,
+							which generalizes UCBVI to MDPs with arbitrary
+							state spaces.
+						</aside>
+						<img style="vertical-align:middle" height="300" data-src="images/adap_ucb.svg">
+						<br>
+						<ul>
+							<li class="fragment" data-fragment-index="1"> Compute $A_{\ell} = \operatorname{argmax}_{a} \operatorname{I}_{a}^{\epsilon}(t_{\ell} - 1, \alpha)$</li>
+							<li class="fragment" data-fragment-index="2"> Choose arm $A_{\ell}$ until round t such that $N_{A_\ell}(t) = 2N_{A_\ell}(t_{\ell} - 1)$</li>
+							<li class="fragment" data-fragment-index="3"> Update $\operatorname{I}_{a}^{\epsilon}$ using only reward samples from the last episode</li>
+						</ul>
+						<br>
+						<br>
+						<span class="r-stack">
+						<span class="fragment current-visible" data-fragment-index="4">
+						$$\operatorname{I}_{a}^{\epsilon}(t_{\ell}, \alpha) \triangleq  \hat{\mu}_{a}^{\ell}  + \sqrt{ \frac{ \alpha \log(t_{\ell})}{ 2\times \frac{1}{2} N_a(t_\ell) } } + \mathrm{Lap} \left( \frac{1}{\epsilon \times \frac{1}{2} N_a(t_\ell)} \right) +   \frac{\alpha \log( t_{\ell})}{ \epsilon \times \frac{1}{2} N_a(t_\ell ) }$$
+						</span>
+						<span class="fragment current-visible" data-fragment-index="5">
+							<span class="theorem">
+								<b class="blue2"> Theorem.</b> AdaP-UCB is $\epsilon$-DP for rewards in $[0,1]$ and for $\alpha > 3$
+								$$
+								\mathrm{Reg}_{T}(\mathsf{AdaP\text{-}UCB}, \nu) \leq  \sum\limits_{a \colon \Delta_a > 0} \left ( \frac{16 \alpha }{\min\{\Delta_a, \epsilon\}} \log(T) + \frac{3 \alpha}{\alpha - 3} \right )
+								$$
+							</span>
+						</span>
+						</span>
+						<span class="myfootnote" style="font-size: 17px;">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022).
+						</span>
+					</section>
+
+					<section style="font-size: 30px;">
+						<header><h3>Extension to Other Settings</h3></header>
+						
+						<p style="text-align: left;"> We use the same generic recipe to design:</p>
+						<ul>
+							<span class="fragment" data-fragment-index="1">
+							<li> A near-optimal DP version of the Top Two algorithm for FC-BAI [$\ast$]</li>
+							<ul>
+								<li> Calibrating the stopping rule for noise addition </li>
+								<li> Adapting the transportation costs</li>
+							</ul>
+							</span>
+							<br>
+							<span class="fragment" data-fragment-index="2">
+							<li> A near-optimal DP elimination-based algorithm for linear bandits [$\ast \ast$]</li>
+							<ul>
+								<li> Explore each arm longer due to noise addition </li>
+							</ul>
+							</span>
+							<br>
+							<span class="fragment" data-fragment-index="3">
+							<li> A near-optimal DP version of LinUCB for contextual linear bandits [$\ast \ast$]</li>
+							<ul>
+								<li> Phase changes when the determinent of the design matrix doubles</li>
+								<li> Calibrating the ellipsoid confidence intervals for noise addition</li>
+								<li> The contexts are supposed public! </li>
+							</ul>
+						</span>
+						</ul>
+						<br>
+						<br>
+						<span class="myfootnote" style="font-size: 15px;">
+							<ul>
+								<span class="fragment" data-fragment-index="1"> 
+								<li> [$\ast$] <span class="blue2">A. Azize</span>, M. Jourdan, A. Marjani, D. Basu.
+									<b>On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence</b> (NeurIPS 2023)</li>
+								</span>
+								<span class="fragment" data-fragment-index="2">
+								<li> [$\ast\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b>Concentrated Differential Privacy for Bandits</b> (SaTML 2023) </li>
+								</span>
+							</ul>	
+						</span>
+					</section>
+
+					<section data-background="white">
+						<header><h3>Experiments</h3></header>
+						
+						<img style="vertical-align:middle" height="500" data-src="images/fig_regimes.svg">
+					</section>
+
+					<section>
+						<header><h3>Algorithm Design</h3></header>
+						<header><h5>Recap</h5></header>
+						<br>
+						Using the same algorithmic blueprint, we design near-optimal private bandit algorithms in different settings
+					</section>
+
+
+				</section> <!-- end of Algorithm Design -->
+
+
+				<!-- 
+
+					MIG
+
+				-->
+				<section>
+					<!-- Header  -->
+					<section>
+						<header><h3> Membership Inference Games </h3></header>
+					</section>
+
+
+					<section data-background="white" style="font-size: 28px;">
+						<header><h3>Setting</h3></header>
+						<img style="vertical-align:middle" height="450" data-src="images/mechanism_mia.svg">
+						<br>
+						<span class="fragment">
+						<b>Main question:</b>
+						<br>
+						 Given $z^\star \in \mathcal{Z}$ and $o \sim \mathcal{M}_D$, is it possible to determine if $z^\star \in  D$? 
+						</span>
+					</section>
+
+					<section style="font-size: 33px;">
+						<aside class="notes">
+							We propose an algorithm called KeRNS,
+							which is exactly the same as Kernel-UCBVI,
+							except that the weights used to estimate
+							the model are defined using a time-dependent kernel.
+							More precisely, the weight of a sample now depends on
+							the time interval between the current episode t
+							and the episode i where the sample was observed.
+						</aside>
+						<header><h3>Motivation</h3></header>
+						<br>
+						<ul>
+							<li> Studied first as a privacy attack</li>
+							<ul>
+								<li>
+									[Homer et al., 2008] for biological data
+								</li>
+								<li>
+									[Yeom et al., 2018] for “overfitted” neural nets
+								</li>
+								<li>
+									Can be combined with “stronger” privacy attacks
+								</li>
+							</ul>
+							<br>
+							<span class="fragment">
+							<li> Used for privacy auditing</li>
+							<ul>
+								<li>
+									Estimate a lower bound on the privacy budget $\epsilon$ of a DP mechanism
+								</li>
+								<li>
+									Find bugs in code, mistakes in DP proofs
+								</li>
+							</ul>
+							</span>
+						</ul>
+					</section>
+
+					<section style="font-size: 28px;">
+						<aside class="notes">
+							We need time-dependent kernels with two properties:
+							the weights for data collected very far in the past
+							must be small to control the bias,
+							but we also need to remember recent data in order
+							to control the variance of our estimators.
+						</aside>
+						<header><h3>The Membership Inference Game</h3></header>
+						<br>
+						A game between:
+						<ul>
+							<li class="fragment" data-fragment-index="1"> A crafter $\mathcal{C}$: entity with access to the input dataset and the mechanism $\mathcal{M}$ </li>
+							<li class="fragment" data-fragment-index="3"> An adversary $\mathcal{A}_{z^\star}$: tries to determine whether $z^\star$ is in the input dataset</li>
+						</ul>
+						<br>
+						<br>
+						
+						<span class="r-stack">
+						<span class="fragment current-visible" data-fragment-index="2">
+						<span class = "theorem"  style="text-align: left;">
+							The crafter $\mathcal{C}$:
+							<br>
+							<ul>
+								<li> Input: $\mathcal{M}$, $n$ and $z^\star$, distribution $\mathcal{D}$ </li>
+								<li> Builds dataset $D \sim \bigotimes_{i = 1}^n \mathcal{D}$ </li>
+								<li> Sample $b \sim \mathrm{Ber}\left ( 1/2 \right)$ </li>
+								<li> If $b = 1$:</li>
+								<ul>
+									<li> Include $z^\star$ in $D$ at a random position </li>
+								</ul>
+								<li> Sample $o \sim \mathcal{M}(D)$</li>
+								<li> Output: $(o, b)$ </li>
+							</ul>
+						</span>
+					</span>
+				
+					<span class="fragment current-visible" data-fragment-index="4">
+						<span class = "theorem" style="text-align: left;">
+							The adversary $\mathcal{A}_{z^\star}$:
+							<br>
+							<ul>
+								<li> Input: $o \in \mathcal{O}$ </li>
+								<li> Output: $\hat{b} \sim \mathcal{A}_{z^\star}(o)$, where $\hat{b} \in \{0,1\}$</li>
+							</ul>
+						</span>
+					</span>
+
+					<span class="fragment current-visible" data-fragment-index="5">
+						<span class = "theorem"  style="text-align: left;">
+							The Interaction Protocol:
+							<br>
+							<ul>
+								<li> Input: crafter $\mathcal{C}$, adversary $\mathcal{A}_{z^\star}$, number of rounds $T$</li>
+								<li> For $t = 1, \dots, T$:</li>
+								<ul>
+									<li> Sample $(o_t, b_t) \sim \mathcal{C}(\mathcal{M}, n, z^\star, \mathcal{D})$
+									<li> $\hat{b}_t \sim \mathcal{A}_{z^\star}(o_t)$ </li>
+								</ul>
+								<li> Output: $\left\{ \mathbb{1} \left( b_t = \hat{b}_t \right) \right\}_{t = 1}^T$ </li>
+							</ul>
+						</span>
+					</span>
+						</span>
+						
+					</section>
+	
+					<section  style="font-size: 28px;">
+						<aside class="notes">
+							In non-stationary environments,
+							we need to adapt the definition
+							of the regret to take into account
+							the fact that the optimal policy
+							can change from one episode to another.
+						</aside>
+						<header><h3>Performance Metrics</h3></header>
+						<br>
+						<ul>
+							<li>
+								The advantage is: $$\mathrm{Adv}(\mathcal{A}_{z^\star}) \triangleq 2 \mathrm{Pr} [\mathcal{A}_{z^\star}(o) = b ] - 1$$
+							</li>
+							<br>
+							<li>
+								For $\mathcal{A}_{s, \tau, z^\star}(o)  = \mathbb{1} \left( s(o, z^\star) \geq \tau \right)$, the power under significance $\alpha$ is: 
+								$$ \mathrm{Pow}(s, \alpha) \triangleq \max_{\tau \in T_\alpha}  \mathrm{Pr} \left[s(o, z^\star) \geq \tau \mid b = 1\right] $$
+								where $T_\alpha \triangleq \left \{ \tau \in \mathbb{R}: \mathrm{Pr} \left[s(o, z^\star) \geq \tau \mid b = 0 \right] \leq \alpha \right \} $
+							</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 28px;">
+						<header><h3>Optimal Adversary</h3></header>
+						<header><h5> The Neyman-Pearson Lemma </h5></header>
+						<br>
+						MIG can be seen as a hypothesis test:
+						<ul>
+							<li> Under $H_0$, $z^\star$ was "not included", $o \sim p^\mathrm{out}(o \mid z^\star)$ </li>
+							<li> Under $H_1$, $z^\star$ was "included", $o \sim p^\mathrm{in}(o \mid z^\star)$ </li>
+						</ul>
+						<br>
+						<br>
+						<span class="fragment">
+						Then, the log-likelihood ratio score is:
+							$$
+								\ell(o; z^\star) \triangleq \log\left( \frac{p^\mathrm{in}(o \mid z^\star)}{p^\mathrm{out}(o \mid z^\star)} \right)
+							$$
+						</span>
+						<span class="fragment">
+						The LR-based attacker is: $$\mathcal{A}_{\ell, \tau, z^\star}(o) = \mathbb{1} \left(\ell(o; z^\star) \geq \tau\right)$$
+						</span>
+						<span class="fragment">
+						The Bayes attacker is $\mathcal{A}_{\mathrm{Bayes}, z^\star} \triangleq \mathcal{A}_{\ell, 0, z^\star}$.
+						</span>
+					</section>
+
+					<section style="font-size: 28px;">
+						<header><h3>Leakage by the Optimal Attacker</h3></header>
+						<br>
+						
+						<span class="theorem" style="text-align: left;">
+						<b class="blue2"> Theorem.</b>
+						<br>
+						<ul>
+							<li>For any adversary $\mathcal{A}_{z^\star}$:
+								$$ \mathrm{Adv}(\mathcal{A}_{z^\star}) \leq  \mathrm{Adv}(\mathcal{A}_{\mathrm{Bayes}, z^\star}) = \mathrm{TV} \left(p^\mathrm{out}(. \mid z^\star), p^\mathrm{in}(. \mid z^\star)\right)$$ </li>
+							<li> For any score $s$, and under any significance $\alpha$: 
+								$$ \mathrm{Pow}(s, \alpha) \leq  \mathrm{Pow}(\ell, \alpha)$$ </li>
+						</ul>
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						<span class="theorem" style="text-align: left;">
+						<b> Definition.</b>
+						The membership leakage of $z^\star$, for $\mathcal{M}$, under distribution $\mathcal{D}$ is
+
+    					$$ \xi(z^\star, \mathcal{M}, \mathcal{D}) \triangleq \mathrm{Adv}(\mathcal{A}_{\mathrm{Bayes}, z^\star}) = \mathrm{TV} \left(p^\mathrm{out}(. \mid z^\star), p^\mathrm{in}(. \mid z^\star)\right)
+						$$
+						</span>
+						</span>
+						<br>
+						<br>
+						<span class="fragment">
+						How to quantify $\xi(z^\star, \mathcal{M}, \mathcal{D})$?
+						</span>
+					</section>
+
+					<section style="font-size: 26px;">
+						<header><h3>The Empirical Mean </h3></header>
+						<br>
+						<ul>
+							<li> The mechanism:</li>
+						$$\left.\begin{matrix}
+							z_1 \in \mathbb{R}^d\\ 
+							z_2 \in \mathbb{R}^d\\ 
+							.\\ 
+							. \\
+							z_n \in \mathbb{R}^d\\ 
+							\end{matrix}\right\} \xrightarrow{\mathcal{M}^\mathrm{emp}}\hat\mu_n  \triangleq \frac{1}{n} \sum_{i = 1}^n z_i \in \mathbb{R}^d $$
+						
+							<li class="fragment"> Assumption on data-generating distribution $\mathcal{D}$:
+								<ul>
+									<li> Column-wise independent $\mathcal{D} = \bigotimes_{j = 1}^d \mathcal{D}_j$</li>
+									<li> Real mean $\mu = (\mu_1, \dots, \mu_d) \in \mathbb{R}^d$ </li> 
+									<li> Covariance $C_\sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_d^2) \in \mathbb{R}^{d\times d}$</li>
+									<li> Finite 4-th moment</li>
+								</ul>
+							</li> 
+							</ul>
+						<br>
+						<br>
+						<span class="fragment">
+							<b > Main tool:</b> Asymptotic normality, when both $n,d \rightarrow \infty$, such that $d/n = \tau$
+						</span>
+					</section>
+
+					<section style="font-size: 26px;">
+						<header><h3> Membership Leakage of the Mean</h3></header>
+						<br>
+						<span class="theorem">
+							<b class="blue2"> Theorem.</b>[$\ast$] The asymptotic leakage of a target $z^\star$ in the empirical mean is:
+							$$\lim_{n,d} \xi_n(z^\star, \mathcal{M}^\mathrm{emp}_n, \mathcal{D}) = \Phi\left (\frac{\sqrt{m^\star}}{2}\right) - \Phi\left(-\frac{\sqrt{m^\star}}{2}\right)$$
+
+							<br>
+							The optimal asymptotic power, achievable under significance $\alpha$:
+							$$\lim_{n,d} \mathrm{Pow}_n(\ell_n, \alpha, z^\star) = \Phi\left( \Phi^{-1}(\alpha) + \sqrt{m^\star}\right)$$
+						</span>
+						 <br>
+						 <p style="text-align: left;"> where:</p> 
+						 <ul>
+							<li> $ m^\star \triangleq\lim_{n,d} \frac{1}{n} \| z^\star - \mu \|^2_{C_\sigma^{-1}} $</li>
+							<li> $\Phi$ is the CDF of the standard normal distribution </li>
+						 </ul>
+						 <br>
+						 <br>
+						 <span class="myfootnote" style="font-size: 17px;">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+									<b> Quantifying the target-dependent Membership Leakage </b> (TPDP 2024).
+						</span>
+					</section>
+
+					<section style="font-size: 26px;">
+						<header><h3> Membership Leakage of the Mean</h3></header>
+						<header><h5> Proof main steps:</h5></header>
+						<br>
+						<ul>
+							<li>
+								Edgeworth Expansion of the LR test:
+								$$\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma) = (z^\star - \mu)^T C_\sigma^{-1}(\hat{\mu}_n - \mu) 
+								- \frac{1}{2n} \|z^\star - \mu\|^2_{C_\sigma^{-1}} + o_p(1)$$
+							</li>
+							<li class="fragment">
+								Lindeberg-Feller CLT to get the asymptotic distribution of the LR test:
+								<ul>
+									<li>Under $H_0$: $$\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma )  \rightsquigarrow \mathcal{N}\left(-\frac{1}{2}  m^\star, m^\star \right)$$ </li>
+									<li>Under $H_1$: $$\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma )  \rightsquigarrow \mathcal{N}\left(\frac{1}{2}  m^\star, m^\star \right)$$  </li>
+								</ul>
+							</li>
+							<li class="fragment">
+								Get the advantage and the power using testing between Gaussians
+							</li>
+						</ul>
+						<br>
+					</section>
+
+					<section style="font-size: 34px;">
+						<header><h3> Membership Leakage in Different Settings</h3></header>
+						<br>
+						<table class="smallertext theorem">
+							<tr>
+								<th>Setting</th>  
+								<th>Leakage Score</th>
+							</tr>
+							<tr>
+								<td>
+									Empirical mean </td>
+								<td>
+									$\frac{1}{n} \| z^\star - \mu \|_{C_\sigma^{-1}}^2$
+								</td>
+							</tr>
+							<tr>
+								<td> Gaussian Noise $(\gamma > 0)$</td>
+								<td >
+									$\frac{\sigma^2}{\sigma^2 + \gamma^2} \frac{1}{n} \| z^\star - \mu \|_{C_\sigma^{-1}}^2$
+								</td>
+							</tr>
+							<tr>
+								<td>Sub-sampling $(\rho < 1)$</td>
+								<td>
+									$\frac{\rho}{n} \| z^\star - \mu \|_{C_\sigma^{-1}}^2$
+								</td>
+							</tr>
+							<tr>
+								<td>Target Misspecification</td>
+								<td>
+									$\frac{1}{n} \left(z^\star_{\mathrm{targ}} - \mu\right)^T C_\sigma^{-1}\left(z^\star_{\mathrm{true}} - \mu \right)$
+								</td>
+							</tr>
+						</table>
+					</section>
+
+					<section data-background="white">
+						<header><h3> Simulations</h3></header>
+						<img height="500" data-src="images/sims_mia2.svg">
+					</section>
+
+					<section style="font-size: 27px;" data-background="white">
+						<header><h3> Beyond Empirical Mean</h3></header>
+						<header><h5> Gradient Descents in Federated Learning</h5></header>
+						<img height="350" data-src="images/fl_prot.svg">
+
+						<span class="r-stack">
+						<span class="fragment current-visible" data-fragment-index="1">
+						$$\theta_{t+1} = \theta_t - \eta_t \mathcal{M}(g_{t,1}, \dots, g_{t,1}, g^\star_t)$$
+						</span>
+
+						<span class="fragment current-visible" data-fragment-index="2">
+						<ul>
+							<li>
+								Choose $g^\star_t$ as the gradient with highest estimated Mahalanobis distance
+							</li>
+
+							<li>
+								Use Covariance Attack to trace $g^\star$: $$(g^\star_t - \hat{\mu}^t_0)^T(\hat{C}^t_0)^{-1}\left( \frac{\theta_{t+1} - \theta_t}{\eta_t} - \hat{\mu}^t_0 \right) $$
+							</li>
+						</ul>
+					</span>
+				</span>
+					</section>
+
+					<section data-background="white">
+						<header><h3> Experiments</h3></header>
+						<img height="500" data-src="images/fig_mia_exps3.svg">
+					</section>
+
+					<section>
+						<header><h3> Membership Inference Games<h3></header>
+						<header><h5> Recap </h5></header>
+						<br>
+						The Mahalanobis score explains the target-dependent hardness of MIGs against the mean
+					</section>
+
+
+
+				</section> <!-- end of MIG -->
+
+
+
+				<section>
+					<!-- Conclusion  -->
+					<section>
+						<header><h3>Conclusion & Perspectives</h3></header>
+					</section>
+					
+					<section style="font-size: 35px;">
+						<header><h3>Privacy in Bandits</h3></header>
+						<br>
+						<ul>
+							<li>Regret/sample complexity lower/upper bounds for bandits with DP</li>
+							<li>Lower bounds: couplings and optimal transport</li>
+							<li>Generic recipe for algorithm desing </li>
+							<li>Two regimes of hardness depending on $\epsilon$ and the gaps</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px;">
+						<header><h3>Perspectives/Open Problems</h3></header>
+						<br>
+						<ul>
+							<li> Lower bounds: $(\epsilon, \delta)$-DP</li>
+							<li> Matching upper and lower bounds up to the same constant</li>
+							<li> Adversarial bandits under DP</li>
+							<li> Contextual linear bandits when contexts are private</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px;">
+						<header><h3>Membership Inference Games</h3></header>
+						<br>
+						<ul>
+							<li> Fixed-target MI Games </li>
+							<li> Same conclusions as Gaussian testing when $4$-th moment is finite:
+								<ul>
+									<li>
+										Mahalanobis distance explains the target hardness
+									</li>
+									<li>
+										Covariance score is the optimal LR test
+									</li>
+								</ul>
+							</li>
+						</ul>
+					</section>
+
+					<section style="font-size: 35px;">
+						<header><h3>Perspectives</h3></header>
+						<br>
+						<ul>
+							<li> Z-estimators and influence functions</li>
+							<li> Black-box auditing</li>
+							<li> Auditing online learning algorithms/auditing contextual bandits</li>
+						</ul>
+					</section>
+
+					<section>
+						<header><h3>Thank you!</h3></header>
+					</section>
+				</section> <!-- end of Conclusion -->
+				<!-- #
+				################################################
+				################################################
+					             TEMPLATE
+				################################################
+				################################################
+				# -->
+
+
+				<!-- TABLE TEMPLATE -->
+				<!--
+						<table>
+							<tr>
+								<th></th>  
+								<th>Col 1</th>
+								<th>Col 2</th>
+								<th>Col 3</th>
+							</tr>
+							<tr>
+								<th>Blabla</th>  
+								<td>Data 1</td>
+								<td>Data 2</td>
+								<td>Data 3</td>
+							</tr>
+						  </table>
+				-->
+
+				<!-- SECTION TEMPLATE -->
+					<!--
+					<section>
+						<header><h3>My section ...</h3></header>
+						<br>
+					</section>
+					-->
+
+				<!-- TWO-COLUMN TEMPLATE -->
+				<!-- <div class="row">
+					<div class="column"></div>
+					<div class="column"></div>
+				</div> -->
+
+
+				<!-- Video -->
+				<!-- <video width="480" data-autoplay muted loop data-src="media/max_f_with_reinforce.mp4" type="video/mp4"></video> -->
+			</div>
+		</div>
+
+		
+
+		<!-- <section>
+			<header><h6>Title</h6></header>
+			<br></br>
+			<small>
+
+			</small>
+		</section>	 -->
+		<!-- --------------------------------------------------------------------- -->
+		<!-- --------------------------------------------------------------------- -->
+		<!-- --------------------------------------------------------------------- -->
+
+		<script src="dist/reveal.js"></script>
+		<script src="plugin/notes/notes.js"></script>
+		<script src="plugin/search/search.js"></script>
+		<script src="plugin/highlight/highlight.js"></script>
+		<script src="plugin/math/math.js"></script>
+		<script src="plugin/zoom/zoom.js"></script>
+		<script async defer src="https://buttons.github.io/buttons.js"></script>
+		<script>
+			// More info about initialization & config:
+			// - https://revealjs.com/initialization/
+			// - https://revealjs.com/config/
+			Reveal.initialize({
+				// I (Omar) modified default width/height. Be careful!
+				// See https://revealjs.com/presentation-size/
+				width: 1080,
+  				height: 700,
+				hash: true,
+				slideNumber: true,
+				math: {
+					mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+					config: 'TeX-AMS_HTML-full',
+				  // pass other options into `MathJax.Hub.Config()`
+				  TeX: { Macros: {
+					  Real: "{\\mathbb{R}}",
+					  expectedvalue: "\\mathop{\\mathbb{E}}",
+					  sigmacovSA: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}}\\right| ",
+					  sigmacovS: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}'}\\right| ",
+					  epscovSA: "\\left| \\color{red}{\\mathcal{C}_{\\varepsilon}}\\right| ",
+
+				  }}
+			  },
+				// Learn about plugins: https://revealjs.com/plugins/
+				plugins: [ RevealSearch, RevealHighlight, RevealNotes, RevealMath, RevealZoom ]
+			});
+		</script>
+	</body>
+</html>
