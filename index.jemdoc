@@ -3,15 +3,15 @@
 
 ~~~
 {}{img_left}{linkedin_azize.jpeg}{alt text}{220}{220}
-PhD Student,\n [https://team.inria.fr/scool/ Scool (Inria Lille)], \n[https://www.univ-lille.fr/ Université de Lille]\n
+Postdoctoral Fellow,\n [https://team.inria.fr/fairplay/ Inria FairPlay], \n[https://crest.science/ CREST, ENSAE]\n
 Phone: \+33 6 98 26 25 57 \n
-e-mail: achraf.azize@inria.fr \n
+e-mail: achraf.azize@ensae.fr \n
 [https://scholar.google.com/citations?user=9RKFStAAAAAJ&hl=en&oi=ao Google Scholar]
 ~~~
 
 == About me
-I am a PhD student in the Scool team (previously SequeL) at Inria Lille (France) under the supervision of [https://debabrota-basu.github.io/ Debabrota Basu] and [https://philippe-preux.github.io/ Philippe Preux].
-I am exploring privacy-preserving machine learning in sequential learning.
+I am a postdoctoral fellow in the [https://team.inria.fr/fairplay/ FairPlay team] at CREST, ENSAE, under the supervision of Vianney Perchet. I completed my PhD in the [https://team.inria.fr/scool/ Scool team] (previously SequeL) at Inria Lille (France) under the supervision of [https://debabrota-basu.github.io/ Debabrota Basu] and [https://philippe-preux.github.io/ Philippe Preux].
+I am exploring privacy-preserving machine learning in the online setting.
 Prior to my PhD, I graduated from École Polytechnique and ENS Paris-Saclay. 
 
 You can find my PhD thesis [PhD_thesis.pdf here]. The slides of my PhD presentation are also available [phd-thesis-slides/index.html here]. 
@@ -25,5 +25,5 @@ My research interests include:
 - Privacy Auditing
 
 
-[Achraf_s_Resume.pdf A brief cv]
+[Achraf_s_Resume.pdf A brief (old) cv]
 
