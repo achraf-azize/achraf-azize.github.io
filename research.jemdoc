@@ -6,8 +6,8 @@ Here is a full list of my publications, thesis and project reports. \n
 For published articles, visit my [ [https://scholar.google.com/citations?user=9RKFStAAAAAJ&hl=fr&oi=ao/] scholar ] page. 
 
 == Publications
+  A. Azize and D. Basu, Some Targets Are Harder to Identify than Others: Quantifying the Target-dependent Membership Leakage. Primary version: [https://tpdp.journalprivacyconfidentiality.org/2024/ TPDP2024] [https://arxiv.org/abs/2402.10065 arxiv]. In Proc. AISTATS2025 (Oral) \n
   A. Azize and D. Basu, Open Problem: What is the Complexity of Joint Differential Privacy in Linear Contextual Bandits? In Proc. [https://proceedings.mlr.press/v247/azize24a/azize24a.pdf COLT2024] \n
-  A. Azize and D. Basu, How Much Does Each Datapoint Leak Your Privacy? Quantifying the Per-datum Membership Leakage. Primary version: [https://tpdp.journalprivacyconfidentiality.org/2024/ TPDP2024] [https://arxiv.org/abs/2402.10065 arxiv] \n
   A. Azize, M. Jourdan, A. Al Marjani, and D. Basu. On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence. Primary version: [https://ewrl.wordpress.com/ewrl16-2023/ EWRL2023]. In Proc. [https://arxiv.org/abs/2309.02202 Neurips2023 ] \n
   A. Azize and D. Basu, Concentrated Differential Privacy for Bandits. Primary version: In [https://ewrl.wordpress.com/ewrl16-2023/ EWRL2023]. In Proc. [https://satml.org/2024/ IEEE@SaTML2024] \n
   A. Azize and D. Basu, Rényi Differentially Private Bandits. In [https://aaai-ppai23.github.io/ PPAI@AAAI], 2023 ([Renyi_DP_Bandits.pdf PDF]) \n
@@ -19,6 +19,7 @@ For published articles, visit my [ [https://scholar.google.com/citations?user=9R
   
 
 == Thesis
+  A. Azize, Privacy-Utility Trade-offs in Sequential Decision-Making under Uncertainty, PhD Thesis, [ [PhD_thesis.pdf manuscript], [phd-thesis-slides/index.html slides] ] \n
   A. Azize, Multi-Object Manipulation using Relational Reinforcement Learning, Msc Thesis, [ [https://github.com/achraf-azize/InstaDeep_Internship/blob/main/AZIZE%20ACHRAF%20RAPPORT.pdf/ report] ]
   
 == Project reports
