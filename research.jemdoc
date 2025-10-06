@@ -6,6 +6,8 @@ Here is a full list of my publications, thesis and project reports. \n
 For published articles, visit my [ [https://scholar.google.com/citations?user=9RKFStAAAAAJ&hl=fr&oi=ao/] scholar ] page. 
 
 == Publications
+  M. Jourdan and *A. Azize*, Optimal Best Arm Identification under Differential Privacy. In Proc. NeurIPS2025. \n
+  *A. Azize*, Y. Wu, J. Honda, F. Orabona, S. Ito and D. Basu, Optimal Regret of Bandits under Differential Privacy. In Proc. NeurIPS2025. \n
   *A. Azize* and D. Basu, Some Targets Are Harder to Identify than Others: Quantifying the Target-dependent Membership Leakage. Primary version: [https://tpdp.journalprivacyconfidentiality.org/2024/ TPDP2024] [https://arxiv.org/abs/2402.10065 arxiv]. In Proc. AISTATS2025 (*Oral*) \n
   *A. Azize* and D. Basu, Open Problem: What is the Complexity of Joint Differential Privacy in Linear Contextual Bandits? In Proc. [https://proceedings.mlr.press/v247/azize24a/azize24a.pdf COLT2024] \n
   *A. Azize*, M. Jourdan, A. Al Marjani, and D. Basu. On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence. Primary version: [https://ewrl.wordpress.com/ewrl16-2023/ EWRL2023]. In Proc. [https://arxiv.org/abs/2309.02202 Neurips2023 ] \n
@@ -15,8 +17,12 @@ For published articles, visit my [ [https://scholar.google.com/citations?user=9R
   *A. Azize* and O. Gaizi, Conservative Optimistic Policy Optimization via Multiple Importance Sampling, [https://arxiv.org/abs/2103.03307/ arxiv]
   
 == Invited Talks and Posters
-  *2025*: 
+  *2025*:
   
+          - FairPlay Team Retreat, Fréjus, France. \n
+          - Boston Privacy Seminar, Boston University, USA. \n
+          - METIS Spring School Invited Talk, UM6P in Rabat, Morocco. \n
+          - AISTATS Oral and Poster Presentations, Splash Beach Resort in Mai Khao, Thailand. \n
   	  - FairPlay Seminar, Criteo, Paris. \n
   
   *2024*: 
@@ -43,7 +49,7 @@ For published articles, visit my [ [https://scholar.google.com/citations?user=9R
   
 == Reviewing
 
-  NeurIPS (2023-2024-2025), ICML (2022, 2023, 2024), COLT (2025), EWRL (2022, 2023), AAAI (2023), AISTATS (2025, *Best Reviewer Award*), TMLR
+  NeurIPS (2023-2024-2025), ICML (2022, 2023, 2024), COLT (2025), EWRL (2022, 2023), AAAI (2023), AISTATS (2025-*Best Reviewer Award*, 2026), TMLR, IEEE T-IFS
 
 == Open Problems
   Better privacy guarantees for larger groups, ([Open_problem_Better_privacy_guarantees_for_larger_groups.pdf PDF])
