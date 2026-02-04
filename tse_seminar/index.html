@@ -1,0 +1,2261 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Privacy-Utility Trade-offs in Sequential Decision-Making under Uncertainty </title>
+
+        <link rel="stylesheet" href="dist/reset.css">
+        <link rel="stylesheet" href="dist/reveal.css">
+        <!-- <link rel="stylesheet" href="dist/theme/serif.css" id="theme"> -->
+        <link rel="stylesheet" href="dist/theme/indigo.css" id="theme">
+        <link rel="stylesheet" href="css/custom.css">
+
+        <!-- Theme used for syntax highlighted code -->
+        <link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+
+
+                <!-- First Slide - Title, Author, Topic -->
+                <section>
+                    <section data-background="white">
+                    <header><h4 style="font-size:1.2em">
+                        Optimal Regret of Bandits under<br>
+                        Differential Privacy</h4></header>
+                     <p class="authors" style="font-size:0.8em"> 
+                            <a href="https://achraf-azize.github.io/">Achraf Azize</a>
+                        <!-- <p class="authors" style="font-size:0.5em"> 
+     Postdoc at CREST, Ensae
+                        </p> -->
+                        <br>
+                        <br>
+                        <footer>   
+                            <img data-src="images/cv.svg" height="170">                    
+                        </footer>
+                        <aside class="notes">
+                            “Hi everyone — thanks a lot for having me.
+I'm Achraf Azize, and today I'm going to talk about my recent paper Optimal Regret of Bandits under Differential Privacy.”
+
+“If I had to summarize the paper in one sentence: we characterize, sharply/optimally, the cost of guaranting privacy in sequential decision-making.”
+
+“The talk sits at the intersection of two areas: on one side, online learning — in particular multi-armed bandits and regret minimization — and on the other side, privacy-preserving data analysis, mainly through differential privacy.”
+
+“I won't assume prior knowledge of either bandits or differential privacy. So if you're new to one — or even both — don't worry: I'll build the key ideas from the ground up.”
+
+“I also chose this specific paper because it's the culmination of a line of work I started during my PhD, and now we finally can say the problem is solved optimally, in a precise sense I'll explain later.”
+
+“Before starting,  a quick snapshot of my background: I'm currently a postdoc in Paris-Saclay, at Inria / CREST-ENSAE in the FairPlay group. Before that I did my PhD at Inria Lille in the Scool team, and before that I studied at École Polytechnique and then the MVA master.”
+                        </aside>
+                        </section>
+
+                    <!-- <section data-background="white">
+                        <header><h3>Quick Intro</h3></header> -->
+                        <!-- <img style="vertical-align:middle" height="500" data-src="images/jury6.svg"> -->
+                        <!-- <br> -->
+                        <!-- <ol>
+                            <li>2025- present: Postdoc at CREST, Ensae. With: <b>Vianney Perchet</b></li>
+                            <li>2021- 2024: PhD at Scool, Inria (Lille). With: <b>Debabrota Basu</b> and <b>Philippe Preux</b>   </li>
+                            <li>2020- 2021: MVA Masters </li>
+                        </ol> -->
+						<!-- <aside class="notes">
+						</aside>
+                    </section> -->
+
+                    <!-- <section>
+                        <header><h3>Outline</h3></header>
+                        <br>
+                        <ol>
+                            <li>Context & Motivation</li>
+                            <li>Background: Differential Privacy & Multi-armed Bandits</li>
+                            <li>Defining Privacy for Bandits</li>
+                            <li>Specific Contribution: Optimal Regret of Bandits under Differential Privacy (NeurIPS, 2025) </li>
+                        </ol>
+						<aside class="notes">
+						</aside>
+                    </section> -->
+					
+                </section>
+
+                <!-- 
+
+ Context & Motivation 
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3>Context & Motivation</h3></header>
+                        <br>
+                        <span class="smalltext">Privacy in Bandits</span>
+                        <aside class="notes">
+                            Alright, let me start with motivation, and then we'll move to a clean formalization of the setting.
+                        </aside>
+                    </section>
+
+                    <section data-background="white">
+                        <header><h3>Sequential Decision-Making</h3></header>
+                        <br>
+                        <ul>
+                            <li>Make decisions based on data interactively
+                            <li class="fragment">
+ Data is sensitive and detailed
+                            </li>
+                            <li class="fragment">
+ Multi-armed Bandits under Differential Privacy
+                            </li>
+                        </ul>
+						
+						<aside class="notes">
+							
+							So, we have a tension between two objectives: on one hand, wanting to make good decisions by using all available data and information, and on the other hand, the need to protect sensitive and private data, which often requires concealing and hiding information.
+						</aside>
+						
+                    </section>
+
+                    <section data-background="white">
+                        <header><h3>Multi-armed Bandits</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" height="200" data-src="images/mab.svg">
+                        <br>
+                        <ul>
+                            <li>Learner interacts with an unknown environment </li>
+                            <li>Goal: maximize rewards</li>
+                        </ul>
+                        
+						<aside class="notes">
+						</aside>
+                    </section>
+
+
+                    <section data-background="white">
+                        <header><h3>Example: Clinical trials [1]</h3></header>
+                        <br>
+                        <!-- <img style="vertical-align:middle" height="200" data-src="images/rl_example.svg"> -->
+                        <img style="vertical-align:middle" height="200" data-src="images/medicine_bandit.svg">
+                        <br>
+                        <p> For the $t$-th patient</p>
+                        <ol>
+                            <li> Doctor chooses medicine $a_t \in \{1, \dots, K\}$</li>
+                            <li> If Patient $t$ is cured $r_t = 1$, otherwise $r_t = 0$
+                        </ol>
+                        <span class="myfootnote">
+                            <ul>
+ [1] W. R. Thompson.   
+                                    <b>On the likelihood that one unknown probability exceeds another in view of the evidence of two samples</b>
+ (Biometrika 1933).
+                            </ul>
+                        </span>
+
+						<aside class="notes">
+							The canonical example of bandits is clinical trials. So, let's say we have K-candidate medicines, (look up)
+
+Bandits, first introduced by Thompson back in 1933, have been extensively studied in various forms and settings.
+						</aside>
+                    </section>
+                    <section data-background="white" style="font-size: 31px;"> 
+                        <header><h3>Challenge</h3></header>
+                        <br>
+                        <ul>
+                            <li> Protect the privacy of the patients' data</li>
+                            <li  class="fragment"> Other
+ sensitive applications: recommender systems, online advertisement, hyper-parameter optimisation, etc.  </li>
+                            <!-- <li  class="fragment"> Counterfactual: what can a malicious adversary do? </li> -->
+                        </ul>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                            <b>Main Question:</b> What is the cost of achieving "privacy" in bandits?
+                            </span>
+						
+							<aside class="notes">
+							
+								The main challenge we will look at today is protecting the privacy of patients. Here, the sensitive and private data we are trying to protect is the reward signal, which for clinical trials may reveal sensitive information about the health condition of patients.
+							</aside>
+                    </section>
+
+                   <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Differential Privacy (DP) [1]</h3></header>
+                        <br>
+                        <br>
+                        A <b>promise</b> from a data analyst to data subjects that: <br>
+                        <br>
+
+                        "Same conclusions will essentially be reached, independent of whether any data subject opts into or out of the data set."
+
+                        <br>
+                        <br>
+                        <br>
+                        <span class="myfootnote" style="font-size: 16px;">
+                            <ul>
+								[1] C.Dwork, F.McSherry, K.Nissim, A.Smith.  
+																	<b>Calibrating noise to sensitivity in private data analysis</b>
+								(TCC 2006).
+                            </ul>
+                        </span>
+
+						
+                    </section>
+
+                    
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Differential Privacy (DP)</h3></header>
+
+                        Several Current Deployments
+                        <img style="vertical-align:middle" height="250" data-src="images/dp_dep.svg">
+
+                        <!-- <span class="fragment">
+                        <br>
+                        <b> Privacy Auditing:</b> How to certify privacy/estimate the privacy budget? 
+                        </span> -->
+                        Active Research Field
+                        <img style="vertical-align:middle" height="250" data-src="images/active_research (1).png">
+
+						<aside class="notes">
+							Differential privacy is considered the golden standard framework for privacy, with several successful implementations, at both companies and governmental agencies.
+
+							With this wide implementation of DP, it is important to be able to certify wether indeed these companies have implemented well privacy.
+						</aside>
+                    </section>
+
+
+                    <section style="font-size: 39px;">
+                        <header><h3>Outline</h3></header>
+                        <br>
+                        <ol>
+                            <li>Bandits overview</li>
+                            <li class="fragment">Defining DP in bandits</li>
+                            <li class="fragment">Lower bounds: What is the best utility achievable under DP?</li>
+                            <li class="fragment">Algorithm design: How to achieve the best utility with DP?</li>
+                            <li class="fragment">Conclusion and open Problems</li>
+                        </ol>
+
+						<aside class="notes">
+							So in this presentation, I will first define privacy and utility in bandits
+
+							present lower bounds on the best utility achievable by private bandit algorithms
+							
+							then, we will desing algorithms that match the lower bounds, using similar ingredients 
+							
+							Finally, we will revisit the membership inference games, with the specific motive of improving the auditing pipeline.
+						</aside>
+                    </section>
+                </section>  <!-- end of context & motivation-->
+
+
+                <!-- 
+
+ Bandits
+
+ -->
+ <section>
+    <!-- Header  -->
+    <section>
+        <header><h3> Bandits </h3></header>
+        <br>
+        <span class="smalltext">
+Overview
+        </span>
+    </section>
+
+    
+    <section data-background="white" style="font-size: 34px;">
+        <header><h3>Stochastic Bandit Interaction</h3></header>
+        <br>
+Sequential interaction between:
+        <ul>
+            <li> a policy $\pi = (\pi_t)_t$, where $$\pi_t: (a_1, r_1, \dots, a_{t- 1}, r_{t - 1}) \rightarrow a_t \in [K] $$ </li>
+            <li class="fragment"> an environment $\nu = (P_a)_{a \in [K]}$, with means $\mu = (\mu_a)_{a \in [K]}$</li>
+        </ul>
+        <br>
+        <br>
+        <span class="fragment">
+        <span class="theorem">
+At step $t$
+        <br>
+        <ol>
+            <li> $a_t \sim \pi_t(. \mid a_1, r_1, \dots, a_{t-1}, r_{t-1})$</li>
+            <li> $r_t \sim P_{a_t}$
+        </ol>
+        </span>
+        </span>
+
+        <aside class="notes">
+            we will model the bandit interaction as a sequential game between a policy and an unkonwn environment
+                
+        </aside>
+    </section>
+
+    <section data-background="white" style="font-size: 36px;">
+        <header><h3>Main Utility Objective</h3></header>
+        <br>
+        <b>Regret minimisation:</b> Given a horizon $T$, minimise 
+        <span class="fragment">
+$$\mathrm{Reg}_{T}(\pi, \nu) \triangleq T \mu^\star-\mathbb{E}_{\nu \pi}\left[\sum_{t=1}^{T} r_{t}\right]$$
+where $\mu^\star \triangleq \max\limits_{a \in [K]} \mu_a$
+        </span>
+        <br>
+        <br>
+        <span class="fragment"><b>Minimal Requirement:</b> We want algorithms s.t. $\mathrm{Reg}_{T}/T \rightarrow 0$ as $T \rightarrow \infty$</span>
+        
+
+        <aside class="notes">
+            We will consider two utility objectives:
+            The first one is regret minimisation: so given a horizon T of the number of interactions, we want to minimise the number of expected mistakes we make,
+            
+            so the difference between the expected sum of rewards the policy collected, compared to the the rewards we could have collected if we know the environment in advance.
+        </aside>
+    </section>
+
+   
+    
+    <section data-background="white" style="font-size: 36px;">
+        <header><h3>Another Utility Objective</h3></header>
+        <br>
+        <b>Best-arm Identification:</b> Find the optimal arm 
+$$a^\star \triangleq \arg\max\limits_{a \in [K]} \mu_a$$
+    
+        <span class="fragment">
+Fixed Confidence: Minimise the number of samples used to identify $a^\star$ with confidence $1 - \delta \in (0,1)$
+        </span>
+
+        <aside class="notes">
+            The second utility is best arm identification: where the goal is to actually find the opitmal arm,
+
+            and we want to do so in the minimum number of step of interaction
+        </aside>
+    </section>
+
+    <section data-background="white" style="font-size: 34px;">
+        <header><h3>Naive Algorithms</h3></header>
+        <br>
+
+        <ul>
+            <li> $a_t = $ random action
+                $$ \mathrm{Reg}_{T} = \Omega(T) $$
+            </li>
+
+            <li class="fragment"> Follow The Leader (FTL) 
+                $$ \mathrm{Reg}_{T} = \Omega(T) $$
+            </li>
+
+            <li class="fragment" > $a_t = $ FTL w.prob $1 - \epsilon$, random action w.prob $\epsilon$ 
+                $$ \mathrm{Reg}_{T} = \Omega(\epsilon T) $$
+            </li>
+        </ul>
+
+    </section>
+    
+    <section data-background="white" style="font-size: 34px;">
+        <header><h3>Upper Confidence Bound (UCB) Algorithm [1]</h3></header>
+        <br>
+
+        <ul>
+            <li> Build confidence intervals for the mean of each arm
+            </li>
+
+            <li > Act optimistically to balance exploration and exploitation
+            </li>
+        </ul>
+        <img style="vertical-align:middle" height="320" data-src="images/ucb3.svg">
+        <br>
+        <span class="myfootnote" style="font-size: 17px;">
+            [1] P. Auer, N. Cesa-Bianchi, and P. Fischer.
+                                                <b>Finite-time analysis of the multiarmed
+                                                bandit problem.</b> (Machine Learning, 2002).
+                                    </span>
+
+        <aside class="notes">
+    </section>
+
+    <section data-background="white" style="font-size: 30px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Building confidence intervals</h5></header>
+        <br>
+
+        Let $\hat \mu_a(t)$ be the empirical mean of the arm $a$ at round $t$:
+        $$ \hat \mu_a(t) = \frac{1}{N_a(t)} \sum_{s = 1}^{t - 1} \mathbb{1}\{a_s = a\} r_s \text{ where } N_a(t) = \sum_{s = 1}^{t - 1} \mathbb{1}\{a_s = a\} $$
+        <span class="fragment">
+        <span class="horizental-align:middle">
+            <span class="theorem" style="text-align: left; font-size: 30px;">
+                <b class="blue2">Theorem. </b> For rewards in $[0,1]$, with proba at least $1 - \delta$,
+                $$ | \hat \mu_a(t) - \mu_a  | \leq \sqrt{\frac{\log(1/\delta)}{2 N_a(t)}} $$
+            </span>
+        </span>
+    </span>
+        <br>
+        <br>
+        <span class="fragment">
+            <b>Proof:</b> Use Hoeffding Inequality
+        </span>
+         
+    </section>
+
+    <section data-background="white" style="font-size: 30px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Act optimistically</h5></header>
+        <br>
+
+        At each step $t$, choose the action with highest upper confidence bound:
+        <span class="theorem"> 
+        $$ a_t \in \mathrm{argmax}_{a \in [K]} \mathrm{UCB}_a(t, \delta) $$
+        </span>
+        <br>
+        <br>
+        where 
+        $$ \mathrm{UCB}_a(t, \delta) \triangleq \hat \mu_a(t) +  \sqrt{\frac{\log(1/\delta)}{2 N_a(t)}}  $$
+         
+    </section>
+
+    <section data-background="white" style="font-size: 30px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Regret Analysis</h5></header>
+        <br>
+
+        <span class="horizental-align:middle">
+            <span class="theorem" style="text-align: left; font-size: 30px;">
+                <b class="blue2">Theorem. </b> For rewards in $[0,1]$, for a horizon $T$ and $\delta = 1/T^2$,
+                 $$ \mathrm{Reg}_T(\mathrm{UCB}, \nu) \leq 3 \sum_{a = 1}^K \Delta_a + \sum_{a: \Delta_a > 0} 16 \frac{\log(T)}{\Delta_a} $$
+                where $\Delta_a = \mu^\star - \mu_a$
+            </span>
+        </span>
+
+    </section>
+
+    <!-- <section data-background="white" style="font-size: 25px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Regret proof</h5></header>
+        $$ \mathrm{Reg}_T(\mathrm{UCB}, \nu) = \mathbb{E}\left(\sum_{t = 1} \mu_{a^\star} - \mu_{a_t}\right) $$
+        Then, with proba $1 - \delta$:
+        <br>
+        <ul>
+            <li>
+               $$ \mu_{a^\star} - \mu_{a_t} \leq \hat \mu_{a^\star}(t) +  \sqrt{\frac{\log(1/\delta)}{2 N_{a^\star}(t)}}  - \hat \mu_{a_t}(t) + \sqrt{\frac{\log(1/\delta)}{2 N_{a_t}(t)}} $$
+            </li>
+            <li class="fragment">
+                $$ \mu_{a^\star} - \mu_{a_t} \leq \hat \mu_{a_t}(t) +  \sqrt{\frac{\log(1/\delta)}{2 N_{a_t}(t)}}  - \hat \mu_{a_t}(t) + \sqrt{\frac{\log(1/\delta)}{2 N_{a_t}(t)}} $$
+            </li>
+            <li class="fragment">
+                $ \mu_{a^\star} - \mu_{a_t} \leq 2 \sqrt{\frac{\log(1/\delta)}{2 N_{a_t}(t)}}$
+            </li>
+
+        </ul>
+        <br>
+        <br>
+        <span class="fragment">The proof is concluded by: $N_{a_t}(t) \approx \frac{t}{K}$ and $\sum_{t = 1}^T \frac{1}{\sqrt{t}} \approx \int \frac{1}{\sqrt{t}} \approx \sqrt{T}$
+        </span>
+    </section> -->
+
+
+    <section data-background="white" style="font-size: 28px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Regret proof</h5></header>
+        <br>
+        Under the good event, a suboptimal arm $a$ is not sampled anymore as soon as 
+        $$ \sqrt{\frac{\log(1/\delta)}{2 N_a(t)}} \leq \Delta_a $$
+        <img style="vertical-align:middle" height="250" data-src="images/ucb_proof3.svg">
+        which gives that $N_a(T) \approx \frac{\log(1/\delta)}{\Delta_a^2}$
+        <br>
+        <span class="fragment">Using that $ \mathrm{Reg}_T(\mathrm{UCB}, \nu) = \sum_{a} \mathbb{E}[N_a(T)] \Delta_a $ and $\delta = 1/T^2$ concludes the proof</span>
+    </section>
+
+    <section data-background="white" style="font-size: 20px;">
+        <header><h3>KL-UCB [1] is optimal</h3></header>
+        <br>
+        At each step $t$, chose the action with highest upper confidence bound:
+        <br>
+        <span class="theorem"> 
+        $$ a_t \in \mathrm{argmax}_{a \in [K]} \mathrm{KL}\text{-}\mathrm{UCB}_a(t) $$
+        </span>
+        <br>
+        where 
+        <span> 
+        $$\mathrm{KL}\text{-}\mathrm{UCB}_a(t) \triangleq \max \left\{ \tilde{\mu} \in [0,1]: \mathrm{kl}(\hat{\mu}_a(t), \tilde{\mu} ) \leq \frac{\log f(t)}{N_a(t)} \right\}  $$
+        and $\mathrm{kl}(x, y) \triangleq x \log(x/y) + (1 - x) \log((1 - x)/(1 - y))$
+        </span>
+        <span> 
+        <img style="vertical-align:middle" height="260" data-src="images/klucb4.svg">
+        </span>
+        <br>
+        <span class="myfootnote" style="font-size: 15px;">
+            [1] A. Garivier and O. Cappé.
+                                                <b>The KL-UCB algorithm for bounded stochastic bandits and beyond.</b> (COLT, 2011).
+                                    </span>
+
+        <aside class="notes">
+    </section>
+
+    <section data-background="white" style="font-size: 24px;">
+        <header><h3>KL-UCB [1] is optimal</h3></header>
+        <br>
+        <span class="horizental-align:middle">
+            <span class="theorem" style="text-align: left">
+                <b class="blue2">Theorem. </b> For <b>Bernoulli</b> rewards, for a horizon $T$,
+                 $$ \lim_{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\mathrm{KL}\text{-}\mathrm{UCB}, \nu)}{\log(T)} \leq \sum_{a: \Delta_a > 0} \frac{\Delta_a}{\mathrm{kl}(\mu_a, \mu^\star)}$$
+                 where 
+                 $$
+                 \begin{align*}
+                 \mathrm{kl}(\mu_a, \mu^\star) &\triangleq \mu_a \log(\mu_a/\mu^\star) + (1 - \mu_a) \log((1 - \mu_a)/(1 - \mu^\star))\\
+                 & \geq 2 (\mu^\star - \mu_a)^2 = 2 \Delta_a^2
+                 \end{align*}
+                $$
+            </span>
+            <br>
+            <br>
+            <span class="fragment">
+            <span class="theorem" style="text-align: left">
+                <b class="blue2">Theorem 2. </b> For <b>Bernoulli</b> rewards, and any consistent policy $\pi$,
+                 $$ \lim\inf_{T \rightarrow \infty} \frac{\mathrm{Reg}_T(\pi, \nu)}{\log(T)} \geq \sum_{a: \Delta_a > 0} \frac{\Delta_a}{ \mathrm{kl}(\mu_a, \mu^\star)}$$
+            </span>
+        </span>
+        </span>   
+    </section>
+
+    <section data-background="white" style="font-size: 27px;">
+        <header><h3>Regret Lower Bounds</h3></header>
+        <header><h5>Proof Technique</h5></header>
+        <br>
+        <ul>
+            <li>Reduction to hypothesis testing</li>
+            <li >Construct two bandit environments that are conflicting:</li>
+            <ul>
+                <li> Actions that are good for one environment are bad for the other </li>
+                <li>The two environments are hard to distinguish </li>
+            </ul>
+        </ul>
+        <span class="fragment">
+            <img style="vertical-align:middle;margin:0px 350px" height="300" data-src="images/data_proc_cent.svg">
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \mathrm{KL}\left(\mathbb{P}, \mathbb{Q} \right)
+ $$
+                        </span>
+        </span>
+    </section>
+
+    <section style="font-size: 35px;">
+        <header><h3>Bandits</h3></header>
+        <header><h5>Recap</h5></header>
+        <br>
+        <ul>
+            <li>KL-UCB solves bandits optimally with regret $\sum_{a: \Delta_a > 0} \frac{\Delta_a \log(T)}{ \mathrm{kl}(\mu_a, \mu^\star)}$</li>
+        </ul>
+
+        
+    </section>
+
+
+
+
+
+    <!-- <section data-background="white">
+        <header><h3>Best-arm Identification</h3></header>
+        <br>
+        <ol> 
+            <li>Stop the bandit interaction at time $\tau$</li> 
+            <li>Recommend a final guess $\widehat{a} \in [K]$</li>
+        <br>
+        <span class="fragment">
+        <span class="theorem">
+            <b>Definition: </b>A strategy is $\delta$-correct for a class $\mathcal{M}$, if
+
+$$ \mathbb{P}_{\nu, \pi} ( \tau < \infty, \widehat{a} = a^\star(\nu) ) \geq 1 - \delta$$
+for every environment $\nu \in \mathcal{M}$
+        </span>
+        <br>
+        <br>
+        <span class="fragment">
+            <span style="text-align: left; ; font-size: 35px;">
+            <b >Goal:</b> Design a $\delta$-correct strategy, with the smallest $\mathbb{E}_{\pi, \nu} [\tau]$
+        </span>
+        </span>
+
+        <aside class="notes">
+            Specifcally, the algorithm decides when to stop the interaction, and we call tau the stopping time
+
+            then the algorithm provides a final guess a hat
+            
+            and a strategy is delta correct if it stops and recommends as final guess  the good answer with probabilty at least 1-delta
+            
+            goal is to Design a delta correct strategy, with the smallest expected stopping time
+        </aside>
+    </span>
+        
+    </section>
+
+    <section data-background="white">
+        <header><h3>Two Utility Objectives</h3></header>
+        <br>
+        <b>(a) Regret minimisation: </b> Minimise $\mathrm{Reg}_{T}(\pi, \nu)$
+        <br>
+        <b>(b) FC-BAI: </b> Minimise $\mathbb{E}_{\pi, \nu} [\tau]$ for $\delta$-correct strategies
+
+        <aside class="notes">
+            so to recap: we will look at two utility objectives in bandits: the regret minimisation and fixed confidence best arm identification
+        </aside>
+    </section> -->
+
+   
+
+</section>
+
+
+                <!-- 
+
+ DP
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3> Differential Privacy </h3></header>
+                        <br>
+                        <span class="smalltext">
+ Extending DP to Bandits
+                        </span>
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Privacy-Preserving Data Analysis</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" height="270" data-src="images/PPDA.png">
+                        
+                        <br>
+                        <span class="r-stack">
+                            <span class="fragment current-visible" data-fragment-index="1">
+                                Large collection of personal data:
+                                <br>
+                                <ul>
+                                    <li> Census</li> 
+                                    <li> Public Health</li> 
+                                    <li> Social Networks</li>
+                                </ul>
+                            </span>
+    
+                            <span class="fragment current-visible" data-fragment-index="2">
+                                Type of queries:
+                                <br>
+                                <ul>
+                                    <li> Summary statistics</li> 
+                                    <li> Training machine learning models</li> 
+                                    <li> Synthetic data</li>
+                                </ul>
+                            </span>
+    
+                            <span class="fragment current-visible" data-fragment-index="3">
+                                Two conflicting goals:
+                                <br>
+                                <ul>
+                                    <li> Answering queries <b>accurately</b> about the population</li> 
+                                    <li> Individual information stays <b>hidden</b>
+                                </ul>
+                            </span>
+
+                            <span class="fragment current-visible" data-fragment-index="4">
+                                How to define <b>"privacy"</b> formally?
+                            </span>
+
+                            <span class="fragment current-visible" data-fragment-index="5">
+                                The DP promise from curator to individuals: <br>
+
+                                <b>"Same conclusions will essentially be reached, independent of whether any individual opts into or out of the data set."</b>
+                            </span>
+    
+                            </span>
+
+                    </section>
+
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Differential Privacy (DP) [1]</h3></header>
+                        <br>
+                        <b> Intuition:</b> Indistinguishability from the mass
+                        <img style="vertical-align:middle" height="270" data-src="images/dp_intuition_curve.svg">
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem">
+							$\mathcal{M}$ is $\color{blue}{\epsilon}$-DP if 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{O}, \,  \mathcal{M}_{d}(E) \leq e^{\color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+							$$
+                        </span>
+						<p > $\color{blue}{\epsilon}$: Privacy budget </p>
+                        </span>
+                        <span class="myfootnote">
+                            <ul>
+								[1] C.Dwork, F.McSherry, K.Nissim, A.Smith.  
+																	<b>Calibrating noise to sensitivity in private data analysis</b>
+								(TCC 2006).
+                            </ul>
+                        </span>
+
+						<aside class="notes">
+							To define privacy, we adhere to differential privacy as our main framework . The intuition behind differential privacy is to say that an algorithm is private if the outputs of the algorithm are similar when only the data of one user has changed.
+
+							
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>Comments on the DP definition</h3></header>
+                        <br>
+                        <span class="theorem"> 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{O}, \, e^{\color{blue}{-\epsilon}} \mathcal{M}_{d'}(E) \leq \mathcal{M}_{d}(E) \leq e^{\color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+							$$
+                        </span>
+                        <br>
+                        <br>
+                        <ul>
+                            <li>Smaller the privacy budget $\color{blue}{\epsilon}$, higher the privacy  </li>
+                            <br>
+                            <li class="fragment">
+                                A worst-case guarantee:
+                                <ul>
+                                    <li> Every possible neighbours (even very unlikely ones) </li>
+                                    <li> All possible outputs (even very unlikely ones) </li>
+                                </ul>
+                            </li>
+                            <br>
+                            <li class="fragment">
+                                Protects against an adversary, with unlimited compute power and auxiliary information:
+                                <br>
+                                <p style="text-align: center;">
+                                $H_0$: The output was generated from $d$ <br>
+                                 vs <br>
+                                 $H_1$: The output was generated from $d'$ <br>
+                                 <br>
+                                 $\alpha + e^\color{blue}{\epsilon} \beta \geq 1$ and $\beta + e^\color{blue}{\epsilon} \alpha \geq 1$
+                                </p>
+
+                            </li>
+                        </ul>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Properties of DP</h3></header>
+                        <br>
+                        <span class="theorem"> 
+                            <b>Post-Processing.</b> If $\mathcal{M}$ is $\color{blue}{\epsilon}$-DP, and $\mathcal{F}$ is an arbitrary randomised mapping, then
+                            <br>
+                                $\mathcal{F}o\mathcal{M}$ is $\color{blue}{\epsilon}$-DP
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem"> 
+                            <b>Group privacy.</b> If $\mathcal{M}$ is $\color{blue}{\epsilon}$-DP, $d$ and $d'$ differ in $\color{red}{k}$ elements, then 
+                            $$
+                                \forall E \in \mathcal{O}, \, \mathcal{M}_d(E) \leq e^{\color{red}{k} \color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+                            $$
+                        </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem"> 
+                            <b>Basic composition.</b> If $\mathcal{M} = (\mathcal{M}_1, \dots, \mathcal{M}_T)$ is a mechanism where each $\mathcal{M}_t$ is $\color{blue}{\epsilon}_t$-DP then 
+                            <br>
+                            $\mathcal{M}$ is $\left(\sum_{t= 1}^T \color{blue}{\epsilon}_t \right)$-DP
+                        </span>
+                        </span>
+                    </section>
+                    
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>Achieving DP</h3></header>
+                        <header><h5>The Laplace Mechanism</h5></header>
+                        <br>
+                        Let $f: \mathcal{X}^n \rightarrow \mathbb{R}^d$ be a deterministic function.
+                        <br>
+                        <br>
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b>Definition.</b> The L1 sensitivity of $f$ is $$s_1(f) = \max\limits_{d \sim d'} \left \| f(d) - f(d') \right \|_1 $$
+                            </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="blue2">Theorem.</b> Let $Y_i \sim^{\text{iid}} \mathrm{Lap}\left(\frac{s_1(f)}{\color{blue}{\epsilon}}\right)$.
+                                Then $$\mathcal{M}: x \rightarrow f(x) + (Y_1, \dots, Y_d)$$ is $\color{blue}{\epsilon}$-DP
+                            </span>
+                        </span>     
+                        <br>
+                        <br>   
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="green">Example.</b> $\tilde{\mu}_n \triangleq \frac{1}{n} \sum_{i=1}^{n}x_i + \mathrm{Lap}\left ( \frac{1}{\epsilon n} \right)$ is $\epsilon$-DP, for $x_i \in [0,1]$
+                            </span>
+                        </span>               
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Bandits with DP</h3></header>
+                        <br>
+                        <p><b>Privacy Constraint:</b> Rewards leak sensitive information about individuals</p> 
+                        <span class="fragment">
+                        <img style="vertical-align:middle" height="180" data-src="images/dp_mec2.svg">
+                        <br>
+ 						Ingredients to specify:
+                        <br>
+						<br>
+                        <ul>
+                            <li>The randomized mechanism: induced by the policy $\pi$</li>
+							<li>The output: sequence of actions </li>
+                            <li>The private input dataset: reward dataset </li> 
+                        </ul>
+                    </span>
+					<aside class="notes">
+						For the privacy, we will extend DP to bandits:
+						and to do so we need to specify 3 main ingredient: what is the randomised mechanism, what the input and the output
+						
+						the randomised mechanism will always be induced by the policy, since DP is a property of the algorithm itself and should be independent of any assumptions on how the data is generated so independent of the bandit environment,
+						
+						the output will also be just the sequence of actions, 
+						
+						the main difference that remains the two defintions I will present is in the the input representation
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Table DP</h3></header>
+                        <br>
+                        <b >Definition:</b> $\pi$ satisfies $\epsilon$-DP if $\mathcal{M}^\pi$ is $\epsilon$-DP
+                        <img height="450" data-src="images/table_dp.svg">
+                    </span>
+
+					<aside class="notes">
+						The first defintion is table DP, where we consider that the input dataset is this table of rewards. The intuition is that, we want the distribution of the sequence of actions when the policy interacts with two neighbouring clinical trials to be epsilon close, and we use a full vector of potential rewards to a patient's data in a clinical trial.
+
+						however, in the bandit interaction, when a medicine is recommended to a patient, only the reward correspoding to that medicine is observed
+					</aside>
+                    </section>
+
+                    
+
+                    <section style="font-size: 34px;">
+                        <header><h3>Objectives</h3></header>
+                        <header><h5>Recap</h5></header>
+                        <br>
+                        <ul>
+                            <li> Design an <b>$\epsilon$-DP</b> policy $\pi$ that minimises $\mathrm{Reg}_{T}(\pi, \nu)$ </li>
+
+						<aside class="notes">
+							To recap this section: we defined two main utility objectives, regret and best arm identification,
+							and the goal is to design epsilon DP algorithms for both of these utilities.
+						   
+						</aside>
+                    </section>
+
+                </section>
+                <!-- 
+
+ Lower bounds
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3> Lower Bounds </h3></header>
+                    </section>
+            
+                    
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Regret Lower Bound</h3></header>
+                        <br>
+                        <span class="horizental-align:middle">
+                        <span class="theorem" style="text-align: left; font-size: 30px;">
+                            <b class="blue2">Theorem. </b>[$\ast$] For any $\color{blue}{\epsilon}$-global DP policy $\pi$ consistent over Bernoulli environments, then
+ $$
+ \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\mathrm{d}_{\color{blue}{\epsilon}}(\mu_a, \mu^\star)}
+ $$
+ where $$\textrm{d}_{\color{blue}{\epsilon}}(x, y) \triangleq \inf_{z \in [x \wedge y , x \vee y]}\left \{\color{blue}{\epsilon} |z - x| + \mathrm{kl}(z, y)\right\}$$
+                        </span>
+                    </span>
+                        <br>
+                        <span class="myfootnote">
+ [$\ast$] <span class="blue2">A. Azize</span>, Y. Wu, J. Honda, F. Orabona, S. Ito and D. Basu.
+ <b>Optimal Regret of Bandits under Differential Privacy</b> (NeurIPS 2025)
+                        </span>
+                    </section>
+                    
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Regret Lower Bound</h3></header>
+                        <header><h5>Simplification and Comments</h5></header>
+                        <br>
+                        <span class="theorem" style="text-align: left; font-size: 25px;">
+ $$
+ \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\mathrm{d}_{\color{blue}{\epsilon}}(\mu_a, \mu^\star)}
+ $$
+                        </span>
+                        
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="1">
+                            <br>
+                            <br>
+                            <li> $\begin{align*}
+                                \mathrm{d}_{\color{blue}{\epsilon}}(\mu_a,\mu^\star)=\left\{\begin{aligned}
+                                &\mathrm{kl}\left(\mu_a,\mu^\star\right) \quad  \text{if} \quad \color{blue}{\epsilon} \geq \log\frac{\mu^\star}{\mu_a} + \log \frac{1 - \mu_a}{1 - \mu^\star}\\
+                                    &\mathrm{kl}\left(\frac{\mu^\star}{\mu^\star + (1 - \mu^\star)e^{\color{blue}{\epsilon}}}, \mu^\star\right)+ \epsilon \left( \frac{\mu^\star}{\mu^\star + (1 - \mu^\star)e^{\color{blue}{\epsilon}}}-\mu_a\right)   \quad \text{otherwise} 
+                                \end{aligned}\right.
+                            \end{align*}$</li>
+                                
+                            </ul>
+                            <br>
+                            <br>
+                        </span>
+
+                        <!-- <span class="fragment current-visible" data-fragment-index="2"> 
+                            <br>
+                            <ul>
+                                <li> Can be generalised beyond Bernoullis
+                                </li>
+                                
+                            </ul>
+                        </span> -->
+                        
+                        
+                        <span class="fragment current-visible" data-fragment-index="2"> 
+                            <br>
+                            <ul>
+                                <li> Two hardness regimes: </li>
+                                
+                                <ul>
+                                    <li> A low privacy regime when $\epsilon > \log\frac{\mu^\star}{\mu_a} + \log \frac{1 - \mu_a}{1 - \mu^\star}$: privacy is for "free" i.e. $\mathrm{d}_\epsilon = \mathrm{KL} $ </li>
+                                    <br>
+                                    <br>
+                                    <li> A high privacy regime when $\epsilon \leq \log\frac{\mu^\star}{\mu_a} + \log \frac{1 - \mu_a}{1 - \mu^\star}$: privacy has a cost $\mathrm{d}_\epsilon \sim^{\epsilon \rightarrow 0} \epsilon \mathrm{TV}$ </li>
+                                </ul>
+                            </ul>
+                        </span>
+                    </span>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Lower Bound Proof</h3></header>
+                        <header><h5>Fixed Couplings</h5></header>
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 1px" height="300" data-src="images/coupling.svg">
+                        <br>
+                        <br>
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="1">
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+ $$
+                        </span>
+                    </span>
+                <span class="fragment current-visible" data-fragment-index="2">
+                <span class="theorem" style="text-align: left;">
+                    $$
+                    \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \epsilon \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{d}_\mathrm{Ham}(d, d') \right]
+                    $$
+                </span>
+            </span>
+        </span>
+                    </section>
+
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Lower Bound Proof</h3></header>
+                        <header><h5>Optimising over Couplings</h5></header>
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 1px" height="300" data-src="images/coupling_d_eps.svg">
+                        <br>
+                        <br>
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="1">
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathbb{L}} \left \{  \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{L} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right] + \mathrm{KL}\left(\mathbb{L}, \mathbb{Q} \right) \right\}
+ $$
+                        </span>
+                        </span>
+                        <span class="fragment current-visible" data-fragment-index="2">
+                        <span class="theorem" style="text-align: left;">
+                            $$
+                            \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathbb{L}} \left \{ \epsilon \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{L} \right)}  \mathbb{E}_{(d, d') \sim \mathcal{C}}  \left[\mathrm{d}_\mathrm{Ham}(d, d')\right] + \mathrm{KL}\left(\mathbb{L}, \mathbb{Q} \right) \right\}
+                            $$
+                        </span>
+                    </span>
+                </span>
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Retrieving the Lower bounds</h3></header>
+                        <br>
+                        <ul>
+                            <li> Minimax regret lower bounds [1]</li>
+                            <br>
+                            <li> Sample complexity lower bounds [2,3]</li>
+                            <br>
+                            <li> Regret lower bounds under a linear structure [1,4]</li>
+                            <br>
+                            <li> Generalisation to other DP notions: zero Concentrated DP [4]</li>
+                        </ul>
+
+						<br>
+                        <br>
+                        <br>
+                        <span class="myfootnote", style="font-size: 15px;">
+ [1] <span class="blue2">A. Azize</span>, D. Basu.
+ <b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022)
+ <br>
+ [2] <span class="blue2">A. Azize</span>, M. Jourdan, A. Marjani, D. Basu.
+                            <b>Differentially Private Best-Arm Identification</b> (To appear in JMLR)
+ <br>
+ [3] <span class="blue2">A. Azize</span>*, M. Jourdan*.
+ <b> Optimal Best Arm Identification under Differential Privacy </b> (NeurIPS 2025)
+ <br>
+ [4] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (IEEE SaTML 2024)
+                        </span>
+                    </section>
+                    
+
+                    <!-- <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Lower Bound Proof</b></h3></header>
+                        <br>
+                        <ul>
+                            <li class="fragment">Reduction to hypothesis testing</li>
+                            <br>
+                            <span class="fragment">
+                            <li >Construct two bandit environments that are conflicting:</li>
+                            <ul>
+                                <li> Actions that are good for one environment are bad for the other </li>
+                                <li>The two environments are hard to distinguish </li>
+                            </ul>
+                            </span>
+                            
+                        </ul>
+                        <br>
+                        <br>
+                        <p class="fragment"> Privacy as a "stability" constraint: How similar is the sequence of actions when $\pi$ interacts with two environments $\nu$ and $\nu'$?</p>
+
+						<aside class="notes">
+							now I will try to give some elements on the lower bound proof, and specifically why does the total variation seem to charachteriese the hardness of private bandits
+
+							to prove lower bounds in bandits, we reduce the problem to hypothesis testing
+							
+							this is done by constructing two conflicting environment:
+							 so that Actions that are good for one environment are bad for the other
+							
+							and The two environments are hard to distinguish
+							
+							now, the effect of privacy appears as a stability constraint , since the policy is private it should have similar actions when interacting with any two environments: the technical challenge is how to quantify this similarity;
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 24px;">
+                        <header><h3>Group Privacy</h3></header>
+                        <img height="300" data-src="images/group.svg">
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+                            <b class="blue2"> Theorem. </b> If $\mathcal{M}$ is $\epsilon$-DP
+									$$
+									\mathcal{M}_{d}(E) \leq e^ {\epsilon d_{\mathrm{Ham}}(d, d')} \mathcal{M}_{d'}(E)
+									$$
+ $d_{\mathrm{Ham}}(d, d') \triangleq \sum_{t=1}^T \mathbb{1}\left(d_t \neq d'_t\right)$.
+                            <br>
+                            <br>
+                            <span class="fragment">
+                            <b class="blue2"> Consequence. </b> $\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon d_{\mathrm{Ham}}(d, d') $
+                        </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <b>Question:</b> What happens when $d$ and $d'$ are stochastically generated?
+                        </span>
+
+						<aside class="notes">
+							The starting point is the group privacy property
+							which states that if a mechanism is epsilon dp, then the probability of observing E under any two datasets d and d' is controlled up to exponential of epsilon times hamming distance between d and d', where the hamming distance is the number of different rows between d and d'.
+							
+							a simple consequence of this is that the kl between m _d and m_d' on any datasets d and d' is smaller than epsilon times the hammming distance
+							
+							and the question now, is what happens if the datasets are stochastically generated
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Stochastic Group Privacy</h3></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+                            <b class="blue2"> Definition. </b> Marginal over output, when the dataset is generated using $\mathbb{P}$
+ $$
+ M^\mathbb{P} (E) \triangleq \int_{d \in \mathcal{X}^T } \mathcal{M}_d\left(E \right) \mathrm{d}\mathbb{P} \left(d\right)
+ $$
+
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <b>Question:</b> For two distributions $\mathbb{P}$ and $\mathbb{Q}$, how to control the quantity $\mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right)$?
+                        </span>
+
+						<aside class="notes">
+							SO we suppose that for a data generating distribution P and we define the marginal over P as the probability of observing an event E, but integrated over the stochastic generation of d using P.
+
+							Now for two distributions P and Q, how to control the quantity kl between M^pi and m q?
+						</aside>
+                    </section>
+
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>First Attempt</h3></header>
+                        <header><h5>Data-processing Inequality</h5></header>
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 350px" height="300" data-src="images/data_proc_cent.svg">
+                        <br>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \mathrm{KL}\left(\mathbb{P}, \mathbb{Q} \right)
+ $$
+                        </span>
+
+						<aside class="notes">
+							The first attempt is using a dataprocessing inequality, but this just gives that the KL m pi and m q is smaller than the kl between p and Q
+
+							this is true for any mechansim M and does not use the privacy property 
+							
+							and as a side note this is how the KL generally appears in the non-private lower bounds
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Second Attempt</h3></header>
+                        <header><h5>Couplings</h5></header>
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 1px" height="300" data-src="images/coupling.svg">
+                        <br>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+ $$
+                        </span>
+
+						<aside class="notes">
+							To use the privacy property, we will use couplings. We will shift our way of thinking about the marginals M pi and m q.
+
+							This time, we will think of M pi as being the marginal distribution when a pair of dataset d and d' are generated through coupling of p and q and the mechanism is only applied to the first dataset,
+							
+							while M q is the marginal distribution when agian  d and d' are generated through the same coupling coupling and the mechanism is applied to the second dataset,
+							
+							this way, using again dataprocessing inequalities, we can say that the Kl is smaller than the expectation over the Kl between M_d and M_d' when d and d' are generated through the coupling
+							
+							and since this is true for any coupling the kl is smaller than the inf over couplings
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Couplings and Group Privacy </h3></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+ $$
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+ If $\mathcal{M}$ is $\epsilon$-DP, then $$\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon d_{\mathrm{Ham}}(d, d')$$
+                        </span>
+                        <br>
+                        <span class="fragment">
+ Solve the transport problem
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ d_{\mathrm{Ham}}(d, d') \right]
+ $$
+                        </span>
+                    </span>
+
+					<aside class="notes">
+						This inequality is still true for any mechanism
+
+						but for epison dp mechanisms, using group privacy, the kl between m_d and m_d' is smaller than epsilon times the hamming distance
+						 
+						so to get the sharpest upper bound on the Kl we need to solve the transport problem
+						infinimm over couplings expected hamming distance
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 27px;">
+                        <header><h3>Couplings and Total Variation </h3></header>
+                        <header><h5>Product Distributions</h5></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ There exists a <b>maximal</b> coupling $c_\infty(\mathbb{P}, \mathbb{Q})$ such that 
+ $$
+ \begin{align}
+ \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(X, Y) \sim \mathcal{C}} \left[\mathbb{1}\left (X \neq Y\right)\right] &= \mathbb{E}_{(X, Y) \sim c_\infty(\mathbb{P}, \mathbb{Q})}\left[\mathbb{1}\left (X \neq Y\right)\right]\\
+  &= \mathrm{TV}\left(\mathbb{P}, \mathbb{Q}\right)
+  \end{align}
+ $$
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem" style="text-align: left;">
+ For $\mathbb{P} =\bigotimes_{t = 1}^T \mathbb{P}_{t} $ and $\mathbb{Q} =\bigotimes_{t = 1}^T \mathbb{Q}_{t}$, using $\mathcal{C}_\infty(\mathbb{P}, \mathbb{Q}) \triangleq \bigotimes_{t = 1}^T c_\infty\left(\mathbb{P}_t, \mathbb{Q}_t\right)$:
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \epsilon \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right)
+ $$
+                        </span>
+                    </span>
+
+					<aside class="notes">
+						and it turns out that the Total variation is the solution of this transport problem,
+
+						specifically, a claissic property of the total variation is that  the inf over couplings of the probability that X is different than Y when X and Y are generated throug a copling between p and q is exactly the total variation between p and q
+						
+						and there is a coupling, called a maximal coupling, that achieves this infinimum
+						
+						now, when P and Q are data generating distributions that generate a dataset of size big T such that the rows are independent,
+						
+						by using the coupling,  which is the product of the maximal coupling between each P_t and Q_t, the expected hamming distance becomes just a sum of total varitations
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Couplings and Total Variation </h3></header>
+                        <header><h5>Bandit Interaction</h5></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+                            <b class="blue2"> Theorem.</b>[$\ast$] $\mathbb{M}_{\nu \pi}$ is the marginal over sequence of actions, when $\pi$ interacts with $\nu$. Then, for all $ \nu = (P_a)_{a \in [K]}$ and $\nu' = (P'_a)_{a \in [K]}$
+ $$
+ \mathrm{KL}\left(\mathbb{M}_{\nu \pi}, \mathbb{M}_{\nu' \pi} \right) \leq \epsilon \mathbb{E}_{\nu \pi} \left[ \sum_{t = 1}^T \mathrm{TV} \left(P_{a_t}, P'_{a_t}\right) \right]
+ $$
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <p style="text-align: left;"><b>Proof.</b> Construct a maximally "coupled environment"</p>
+                        </span>
+                        <br>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (SaTML 2024)
+                        </span>
+
+						<aside class="notes">
+							4.13
+							We generalise this also to bandit interaction
+							
+							if M v pi is the marginal over sequence of actions, when pi interacts with nu, then for any two environments nu and nu', the Kl is smaller again than the sum of total variations, but takien in expectation over the stochastic generation of actions a_t 
+							
+							and to prove this, we generalise the coupling idea to bandit environments by constructing maximally coupled envs.
+
+							This the main novel inequality used for lower bounds.
+						</aside>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Retrieving the Lower bounds</h3></header>
+                        <br>
+                        <p style="text-align: left;"> Plugging the KL upper bound into classic lower bound proof, we generate: </p>
+                        <ul>
+                            <li> Minimax and problem-dependent regret lower bounds</li>
+                            <br>
+                            <li> Sample complexity lower bound</li>
+                            <br>
+                            <li> Regret lower bounds under a linear structure</li>
+                            <br>
+                            <li> Generalisation to zero Concentrated DP</li>
+                        </ul>
+
+						<aside class="notes">
+							By plugging that inequality in classic lower bound proofs, we generate many types of lower bounds under different settings:
+
+							Minimax and problem-dependent regret lower bounds
+							
+							Sample complexity lower bound
+							
+							regret lower bounds for linear bandits, so bandits where we suppose that there is a linear structure in rewards
+							
+							and we also generalise the techniques to another variant of DP callled zero concentrated DP, which enjoy good group privacy properties.
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Regret Lower Bound</h3></header>
+                        <br>
+                        <span class="horizental-align:middle">
+                        <span class="theorem" style="text-align: left; font-size: 30px;">
+                            <b class="blue2">Theorem. </b> For any $\epsilon$-DP policy $\pi$ consistent over a class of environments $\mathcal{M}$
+ $$
+ \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\min \biggl( \underset{\text{without DP}}{\underbrace{\textrm{KL}_\textrm{inf}\left(P_{a}, \mu^\star, \mathcal{M}_a\right)}}, \underset{\text{with $\epsilon$-DP}}{\underbrace{\epsilon \, \textrm{TV}_\textrm{inf}\left(P_{a}, \mu^\star, \mathcal{M}_a\right)}} \biggl)}
+ $$
+ where $\Delta_a \triangleq \mu^\star - \mu_a$ 
+ and $$\textrm{d}_\textrm{inf} (P, \mu^\star, \mathcal{M}) \triangleq \inf_{P' \in \mathcal{M}} \left\{ \textrm{d}(P, P'): \mu(P') > \mu^\star \right\}$$
+                        </span>
+                    </span>
+                        <br>
+                        <span class="myfootnote">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022).
+                        </span>
+
+						<aside class="notes">
+							Our first main result is the following regret lower bound,
+
+							we show that for any epsilon Dp consistent policy,
+							the asymptotic regret devided by log T should be at least bigger than sum over sub optimal arm the ratio between the suboptimality gap delta_a divided between the minimum between two information theroretic quantittites; the KL inf, which is a classic quantity that characterises the hardness of the non-private problem and epsilon times a new quantity we called TV inf that is defined similarly to kl inf but just with the tv rather than kl
+						</aside>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Regret Lower Bound</h3></header>
+                        <header><h5>Simplification and Comments</h5></header>
+                        <br>
+                        <span class="theorem" style="text-align: left; font-size: 25px;">
+ $$
+ \liminf _{T \rightarrow \infty} \frac{\mathrm{Reg}_{T}(\pi, \nu)}{\log (T)} \geq \sum_{a: \Delta_{a}>0} \frac{\Delta_a}{\min \biggl( d_a, \epsilon t_a \biggl)}
+ $$
+                        </span>
+                        
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="1">
+                            <br>
+                            <br>
+                            <ul>
+                                <li> $d_a \approx \Delta_a^2$ and $t_a \approx \Delta_a$, the lower bound simplifies to $$\Omega\left(\sum_a \frac{\log(T)}{\min\{ \Delta_a, \epsilon\}}\right)$$</li>
+ and retrieves the $\Omega \left( \frac{K \log(T)}{\epsilon} \right)$ of private Bernoulli bandits from [1]</li>
+                                
+                            </ul>
+                            <br>
+                            <br>
+    
+                            <span class="myfootnote" style="font-size: 19px;">
+ [1] R. Shariff, O. Sheffet. <b>Differentially Private Contextual Linear Bandits </b> (NeurIPS 2018).
+                            </span>
+                        </span>
+                        
+                        
+                        <span class="fragment current-visible" data-fragment-index="2"> 
+                            <ul>
+                                <li> Two hardness regimes: </li>
+                                
+                                <ul>
+                                    <li> A low privacy regime when $\epsilon > \frac{d_a}{t_a} \approx \Delta_a$: non-private lower bound is dominant</li>
+                                    <br>
+                                    <li> A high privacy regime when $\epsilon \leq \frac{d_a}{t_a}\approx \Delta_a$: private lower bound is dominant</li>
+                                </ul>
+                            </ul>
+                        </span>
+
+						<aside class="notes">
+							to simplify this bound, we can think of kl inf in the order of the gap squared, tv inf is in the order of the gap, which simplifies the lower bound to log(T) divided by the min between the gap and epsilon and retrives the sharif sheffet lower bound of private bernoulli bandits;
+
+							4.3 bis
+							This lower bound suggest the existence of two hardness regimes; a low privact regime when epsilon is bigger than kl inf devided by tv inf which is in the order of the gap: and in this case the non private lower bound is dominant and privacy has no cost
+							
+							but when epislon is smaller than order of the gap: its the private lower bound that is dominat, privact has a minimu cost of log T devided by epsilon.
+						</aside>
+                    </span>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Sample Complexity Lower Bound</h3></header>
+                        <br>
+                        <span class="horizental-align:middle">
+                        <span class="theorem" style="text-align: left; font-size: 35px;">
+                            <b class="blue2">Theorem. </b> For any $\epsilon$-DP $\delta$-correct strategy $\pi$
+ $$
+ \mathbb{E}_{\boldsymbol{\nu}, \pi}[\tau] \geq \max\big( \underset{\text{without DP}}{\underbrace{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}}, \underset{\text{with $\epsilon$-DP}}{\underbrace{\frac{1}{\epsilon}  T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}}\big) \log \left( \frac{1}{3 \delta}\right)
+ $$
+ where $\left(T^{\star}_{\textbf{d}}(\boldsymbol{\nu}) \right)^{-1} \triangleq \sup _{\omega \in \Sigma_K} \inf _{\boldsymbol{\lambda} \in \operatorname{Alt}(\boldsymbol{\nu})}  \sum_{a=1}^K \omega_a \textbf{d}(\nu_a, \lambda_a)$.
+                        </span>
+                    </span>
+                        <br>
+                        <br>
+                        <span class="myfootnote">
+ [$\ast$] <span class="blue2">A. Azize</span>, M. Jourdan, A. Marjani, D. Basu.
+                                    <b>On the Complexity of Differentially Private Best-Arm Identification with Fixed Confidence</b> (NeurIPS 2023).
+                        </span>
+
+						<aside class="notes">
+							Similarly for best arm identification we show that for any epsilon dp delta correct strategy, the expected stopping time should be at least bigger than log 1/delta times the max of two information theoretic quantities: the T star kl which characteries the hardness of the non-private problem and a new t star TV that characteries the hardness of the private bandit problem
+						</aside>
+
+                    </section>
+
+                
+
+                <section data-background="white" style="font-size: 25px;">
+                    <header><h3>Sample Complexity Lower Bound</h3></header>
+                    <header><h5>Simplification and Comments</h5></header>
+                    <br>
+                    <span class="theorem" style="text-align: left; font-size: 25px;">
+ $$
+ \mathbb{E}_{\boldsymbol{\nu}, \pi}[\tau] \geq \max\big( T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu}), \frac{1}{\epsilon}  T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})\big) \log \left( \frac{1}{3 \delta}\right)
+ $$
+                    </span>
+                    
+                        <br>
+                        <br>
+                        <ul>
+                            <li > $T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu}) \approx \sum_{a} \frac{1}{\Delta_a^2}$ and  $T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu}) \approx \sum_{a} \frac{1}{\Delta_a}$ </li>
+                            <br>
+                            <span class="fragment">
+                            <li > Two hardness regimes: </li>
+                                
+                                <ul>
+                                    <li> A low privacy regime when $\epsilon > \frac{T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}$: non-private lower bound is dominant</li>
+                                    <br>
+                                    <li> A high privacy regime when $\epsilon \leq \frac{T^{\star}_{\mathrm{TV}}(\boldsymbol{\nu})}{T^{\star}_{\mathrm{KL}}(\boldsymbol{\nu})}$: private lower bound is dominant</li>
+                                </ul>
+                            </span>
+                        </ul>
+                    
+						<aside class="notes">
+							again, we can simplify T star kl to be in the order of the sum of 1 over gaps squarred and T star tv to be in the order of the sum of 1 over gaps
+
+							and similarly, there are two hardness regimes that depend on epsilon and a ration between t star kl and t star tv which is in the order of the gap.
+						</aside>
+
+                    </section> -->
+                    
+                    <section style="font-size: 35px;">
+                        <header><h3>Lower Bounds</h3></header>
+                        <header><h5>Recap</h5></header>
+                        <br>
+                        <ul>
+                            <li>Regret lower bounds for $\epsilon$-DP consistent policies is $$\Omega\left(\sum_a \frac{\log(T) \Delta_a}{\mathrm{d}_{\epsilon}(\mu_a, \mu^\star)}\right)$$</li>
+                        </ul>
+
+						<aside class="notes">
+							To recap the main results, we have a lower bound on regret of order log(T) divided by the minimum between the gap and epsilon
+
+							and a sample complexity lower bound of log 1/delta
+							 times the max between t star kl and one over epsilon times t star tv
+							
+							which represent a target utility that we want to achieve next
+						</aside>
+                    </section>
+
+                </section> <!-- end of lower bounds -->
+
+                <!-- 
+
+ Algorithm Design
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3> Algorithm Design </h3></header>
+                    </section>
+    
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Generic Recipe</h3></header>
+						
+						<img height="400" data-src="images/generic_recipe2.svg">
+
+						<span class="r-stack">
+						<span class="fragment current-visible" data-fragment-index="1">
+							<b class="blue3">1.</b> Characterise a sequence of "sufficient" statistics:
+							<p>i.e. the sequence of actions only depend on these statistics</p>
+						</li>
+						</span>
+
+						<span class="fragment current-visible" data-fragment-index="2">
+							<b class="blue3">2.</b> Estimate the sequence of "sufficient" statistics privately</li>
+                            <ul>
+                                <li> Adding calibrated noise </li>
+                                <li> Run the algorithm in phases, with forgetting</li>
+                            </ul>
+						</span>
+
+						<span class="fragment current-visible" data-fragment-index="3">
+							<b class="blue3"> 3.</b>  Calibrate for the noise addition in the algorithm </li>
+						</span>
+
+						</span>
+
+						<aside class="notes">
+							We propose a generic recipe to make bandit algorithms achive privacy near optimally
+
+(1)
+the first step is to characterise a sequence of sufficient statistics
+
+and by sufficient we mean that the output so the actions are only computed using these statisitcs
+
+for example, in stochastic bandits, the sequence of empirical means is a sufficient statistic, or the sequence of theta hat in linear bandits
+
+(2)
+next, we need to estimate these statistics privately,
+and to do we need to add noise calibrated to the sensitivity of these statistics
+
+and since we estimate a sequence of statistics, if one reward lets say at the beginning is changed, all the statistics after will change and huge amoint of noise is need to achieve privacy;
+
+to overcome this, we propose to run the algorithm in phases with forgetting, so that each statistic is computed on non-overlapping sequences and when one reward change only one statistic is changed
+
+(3)
+and finally, we need to account for the noise addition by recalibrating some parts in the algorithm
+
+this may be recalibrating the exploration bonus in optimisitc algorithms, exploring arms longer in elimination based algorithms or recalibrating the stoping times in best arm identification
+						</aside>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Finite-armed Stochastic Bandits</h3></header>
+                        <header><h5>The UCB Algorithm [1]</h5></header>
+                        <br>
+                        <span class="theorem"> At step $t$, UCB chooses the arm $A_{t} \in \operatorname{argmax}\limits_{a \in [K]} \mathrm{UCB}_a(t)$</span>
+                        <br>
+                        <p>
+ where
+ $
+ \mathrm{UCB}_a(t) = \hat{\mu}_a(t) + \sqrt{\frac{\alpha \log(t)}{2 N_a(t)}}
+ $
+                        </p>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <b>Question:</b> How to design a near-optimal $\epsilon$-DP version of UCB?
+                        </span>
+
+						<br>
+						<br>
+						<br>
+						<span class="myfootnote" style="font-size: 17px;">
+							[1] P. Auer, N. Cesa-Bianchi, and P. Fischer.
+															   <b>Finite-time analysis of the multiarmed
+																bandit problem.</b> (Machine Learning, 2002).
+												   </span>
+
+						<aside class="notes">
+							now, let's see how we can apply our generic recipe for finite-armed stochastic bandits, where our starting non-private algorithm is UCB.
+
+
+							at each step, UCB choses the arm with the highest index, where the index is a high probability upper bound on the real means,
+							so the index can be written as a sum of the empirical mean and a bonus that promotes exploration
+							
+							from this expression, we can see that the indexes are sufficient statistics in UCB, and specifically, the emprical mean of rewards
+							
+							the regret of UCB is order optimal, and achives up to constants the non-private lower bound log T divided by the gap
+							
+							now, lets apply our recipe to design an epsilon DP version of UCB that achives log T divided by min between gaps and epsilon
+						</aside>
+                    </section>
+                    
+                    <section data-background="white" style="font-size: 21px;"> 
+                        <header><h3>First Attempt</h3></header>
+                        <br>Compute the sequence of indexes $\{\mathrm{UCB}_a(t)\}_{a, t}$ privately using basic composition and the Laplace mechanism 
+                                $$ \mathrm{DP}\text{-}\mathrm{UCB}^\epsilon_a(t) = \hat\mu_a(t) + \sqrt{\frac{ \log(t)}{2 N_a(t)}}  + \color{blue}{\mathrm{Lap}\left(\frac{K T}{\epsilon N_a(t)} \right) + \frac{ K T \log(t)}{\epsilon N_a(t)}}, $$
+                            which gives linear regret
+                    </section>
+
+                    <section data-background="white" style="font-size: 21px;">
+                        <header><h3>AdaP-UCB[$\ast$]</h3></header>
+                        <img style="vertical-align:middle" height="300" data-src="images/adap_ucb.svg">
+                        <br>
+                        <ul>
+                            <li class="fragment" data-fragment-index="1"> Compute $A_{\ell} = \operatorname{argmax}_{a} \color{blue}{\operatorname{AdaP-UCB}_{a}^{\epsilon}}(t_{\ell} )$</li>
+                            <li class="fragment" data-fragment-index="2"> Choose arm $A_{\ell}$ until round t such that $N_{A_\ell}(t) = 2N_{A_\ell}(t_{\ell} - 1)$</li>
+                            <li class="fragment" data-fragment-index="3"> Update $\color{blue}{\operatorname{AdaP-UCB}_{a}^{\epsilon}}(t_{\ell} )$ using only reward samples from the last episode</li>
+                        </ul>
+                        <br>
+                        <br>
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="4">
+							<span class="theorem"  style="font-size: 20px;">
+ $$\color{blue}{\operatorname{AdaP-UCB}_{a}^{\epsilon}}(t_{\ell} ) \triangleq  \underset{\text{Non-private index}}{\underbrace{\hat{\mu}_{a}^{\ell}  + \sqrt{ \frac{ \log(t_{\ell})}{ 2\times \frac{1}{2} N_a(t_\ell) } }}} + \underset{\text{Laplace noise}}{\underbrace{\mathrm{Lap} \left( \frac{1}{\epsilon \times \frac{1}{2} N_a(t_\ell)} \right)}} +  \underset{\text{Privacy bonus}}{\underbrace{\frac{ \log( t_{\ell})}{ \epsilon \times \frac{1}{2} N_a(t_\ell )} }}$$
+</span>
+                        </span>
+                        <span class="fragment current-visible" data-fragment-index="5">
+                            <span class="theorem">
+                                <b class="blue2"> Theorem.</b> AdaP-UCB is $\epsilon$-DP for rewards in $[0,1]$ and achieves
+ $$
+ \mathrm{Reg}_{T}(\mathsf{AdaP\text{-}UCB}, \nu) \leq  \sum\limits_{a \colon \Delta_a > 0} \left ( \frac{16 }{\min\{\Delta_a, \epsilon\}} \log(T) + \frac{3 \alpha}{\alpha - 3} \right )
+ $$
+                            </span>
+                        </span>
+                        </span>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022).
+                        </span>
+
+						<aside class="notes">
+							Like we said, we are going to run the algorithm in phases;
+
+							in one phase, the same arm is played
+							
+							to decide which arm to play in one phase, we take the arm with the highest index
+							
+							the length of the phase is computed using arm-dependent doubling, so each arm has a counter, and when an arm is played inside a phase it is played until its counter doubles
+							
+							and finally, we update the index using only the samples collected from the last active episode, this is the forgetting part to have indexes computed on non-overlapping sequences
+							
+							so lets go to step t_4 to see all of this ingredients in action, at t_4 we decide which arm to play using indexes, arm 1 lets say has the highest index, then it is played for the whole phase, the lenght of the phase is 4 because the last time it was played is 2, and finally, to compute the index at step t_5 now, we will only use the rewards r_7 till r_10 for arm 1, and forget the older samples.
+							
+							The expression of the indexes is modified to be private.
+							
+							the expression starts like the ucb index with an emprical mean and an exploration bonus, then we add calibrated laplace noise to achive DP, and then we add a privacy bonus so that this whole explression is still a high probability upper bound on the real mean
+							
+							since the index is still optimisitc, the proof of ucb flows similarly, and we show that the algortihm is epsilon DP and achives the lower bound up to constants
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 21px;">
+                        <header><h3>DP-KLUCB[$\ast$]</h3></header>
+                        <img style="vertical-align:middle" height="300" data-src="images/adap_ucb.svg">
+                        <br>
+                        <ul>
+                            <li> Compute $A_{\ell} = \operatorname{argmax}_{a} \color{blue}{\operatorname{DP-KLUCB}_{a}^{\epsilon}}(t_{\ell})$</li>
+                            <li> Choose arm $A_{\ell}$ until round t such that $N_{A_\ell}(t) = \alpha N_{A_\ell}(t_{\ell} - 1)$</li>
+                            <li> Update $\color{blue}{\operatorname{DP-KLUCB}_{a}^{\epsilon}}(t_{\ell})$ using all samples</li> 
+                        </ul>
+                        <br>
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="1">
+							<span class="theorem"  style="font-size: 20px;">
+ $$\color{blue}{\operatorname{DP-KLUCB}_{a}^{\epsilon}}(t_{\ell}) \triangleq  \max\left\{\tilde \mu \in [0,1] \colon
+    \mathrm{d}_\epsilon\left([\tilde{\mu}_{a}(t_\ell)]_{0}^1, \tilde \mu\right)\le \frac{\log t_\ell}{N_a(t_\ell)}\right\}$$
+</span>
+                        </span>
+                        <span class="fragment current-visible" data-fragment-index="2">
+                            <span class="theorem">
+                                <b class="blue2"> Theorem.</b> DP-KLUCB is $\epsilon$-global DP for rewards in $[0,1]$ and for $\alpha>1$, and Bernoulli bandits $\nu$
+ $$
+ \mathrm{Reg}_{T}(\mathsf{DP\text{-}KLUCB}, \nu) \leq  \alpha  \sum_{a \neq a^*} \frac{\Delta_a\log T}{\mathrm{d}_\epsilon(\mu_a, \mu^\star)} +o(\log T).
+ $$
+                            </span>
+                        </span>
+                        </span>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, Y. Wu, J. Honda, F. Orabona, S. Ito and D. Basu.
+ <b>Optimal Regret of Bandits under Differential Privacy</b> (NeurIPS 2025)
+                        </span>
+
+						
+                    </section>
+
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Extension to Other Settings</h3></header>
+                        <br>
+						<br>
+                        
+						<span class="r-stack">
+                            <span class="fragment current-visible" data-fragment-index="1">
+                            FC-BAI [1,2]: Top Two algorithms
+                            <ul>
+								<li> Sequence of "sufficient" statistics  $(\hat \mu_{a}(t))_{t,a}$</li>
+								<li> Arm-dependent doubling, with forgetting</li>
+                                <li> Re-calibrating the stopping time thresholds for noise addition </li>
+                            </ul>
+							<br>
+							<br>
+							<br>
+							<span class="myfootnote" style="font-size: 15px;">
+                                [1] <span class="blue2">A. Azize</span>, M. Jourdan, A. Marjani, D. Basu.
+                            <b>Differentially Private Best-Arm Identification</b> (To appear in JMLR)
+ <br>
+ [2] <span class="blue2">A. Azize</span>*, M. Jourdan*.
+ <b> Optimal Best Arm Identification under Differential Privacy </b> (NeurIPS 2025)
+								
+                                </span>
+                            </span>
+                            
+                            <span class="fragment current-visible" data-fragment-index="2">
+                            Linear Bandits [$\ast$]: similar arms have similar rewards 
+                            <ul>
+								<li> $a \in \mathbb{R}^d$ and $r_t \triangleq \left\langle\theta^\star, a_{t}\right\rangle+\eta_{t}$ </li>
+								<li> Sequence of "sufficient" statistics: estimated $(\hat \theta(t))_{t}$</li>
+								<li> Elimination-based algorithms: already runs in independent phases</li>
+                                <li> Explore each arm longer due to noise addition </li>
+                            </ul>
+							<br>
+							<br>
+							<br>
+							<span class="myfootnote" style="font-size: 15px;">
+                                [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (SaTML 2024)
+								</span>
+                            </span>
+                            
+                            <span class="fragment current-visible" data-fragment-index="3">
+								Contextual Linear Bandits [$\ast$]: the best medicine depends on the patient 
+                            <ul>
+								<li> $c_t \in \mathbb{R}^d$ is the context and $r_t = \left \langle \theta^\star, \psi(a_t, c_t) \right \rangle + \eta_{t}$ </li>
+								<li> Sequence of "sufficient" statistics  $(\hat \theta(t))_{t}$</li>
+                                <li> Phase change in LinUCB: doubling of determinant of the design matrix</li>
+                                <li> Calibrating the ellipsoid confidence intervals for noise addition</li>
+                                <li> The contexts are supposed to be public! </li>
+                            </ul>
+							<br>
+							<br>
+							<br>
+							<span class="myfootnote" style="font-size: 15px;">
+                                [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (SaTML 2024)
+								</span>
+                            </span>
+                        </span>
+					</span>
+                        
+					<aside class="notes">
+						We use the same recipee to design algorithms for 3 other settings
+
+fo best arm identification, we start from the top two algortihm, we estimate the empirical means privately using the same process we used for ucb, and then we recarlibrate some elements in the algorithm for noise addition, like the thresholds of the stopping rule
+
+we also apply our recipe for linear bandits, where the starting algorithm is elimination based, here the sequence of statistics is the empirical estimates hat theta, the algorithm already runs in independent phase, and the effect of noise addition is having to explore each arm longer
+
+and finally, for contextual liner bandits,
+we apply our recipee to linucb
+
+agian the sequence of sufficient statistics is the empirical estimates hat theta,
+
+to make the algorithm run in phases, we use a doubling of the determinent of the design matrix trick
+
+to count for the noise addition, the ellipsoid confidence intervals should be re calibrated
+
+and finally, i'd like to mention that one limitation of this algorithm is that we suppose that the contexts are public, so only rewards are supposed to be private here.
+					</aside>
+                    </section>
+                    
+                    <section data-background="white">
+                        <header><h3>Experiments</h3></header>
+                        
+                        <img style="vertical-align:middle" height="500" data-src="images/regime_fig_new.svg">
+
+                    </section>   
+
+
+                    <section>
+                        <header><h3>Algorithm Design</h3></header>
+                        <header><h5>Recap</h5></header>
+                        <br>
+ Using the same algorithmic blueprint, we design optimal private bandit algorithms in different settings
+
+					<aside class="notes">
+						So to recap the algortihm design part, we use the same algortihmic ingredients to design near optimal private bandit algorithms in different settings				
+					</aside>
+                    </section>
+
+
+                </section> <!-- end of Algorithm Design -->
+
+
+
+                <section>
+                    <!-- Conclusion  -->
+                    <section>
+                        <header><h3>Conclusion & Open Problems</h3></header>
+                    </section>
+                    
+                    <section data-background="white" style="font-size: 35px;">
+                        <header><h3>Privacy in Bandits</h3></header>
+                        <br>
+                        <ol>
+                            <li> Definitions: Utility (Regret/BAI), Privacy (pure DP)</li>
+                            <li> Lower bounds: couplings and optimal transport</li>
+                            <li> Generic recipe for algorithm design </li>
+                        </ol>
+						<br>
+						<br>
+						<br>
+						<span class="fragment">
+						<span class="theorem">
+							Two regimes of hardness depending on $\epsilon$ and the gaps $(\Delta_a)$
+						</span>
+					</span>
+					<aside class="notes">
+						So in the first part of privacy in bandits, we discussed definition: regret and best arm idenetification for utimity and table and view dp for privacy
+
+						we shower lower bounds using coupling and opitmal transport
+						
+						and then we mathced the lower bounds using a generic recipe based on arm dependent doubling with forgetting
+						
+						the takeawy message is that the existence of two hardness regimes, that depende on epsilon and the suboptimaluty gaps	
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 35px;">
+                        <header><h3>Open Problems</h3></header>
+                        <br>
+                        <ul>
+                            <li> Analysis beyond pure DP: $(\epsilon, \delta)$-DP, $\rho$-zCDP</li>
+                            <li class="fragment"> Adversarial bandits under DP</li>
+                            <li class="fragment"> Contextual linear bandits when contexts are private[$\ast$]</li>
+                        </ul>
+
+						<br>
+						<br>
+						<span class="myfootnote" style="font-size: 17px;">
+							[$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+															   <b> Open Problem: What is the Complexity of Joint Differential Privacy in Linear Contextual Bandits? </b> (COLT 2024).
+												   </span>
+					
+						<aside class="notes">
+							there are stll many interesting open problem left to be explored
+
+							like finding lower bounds for variant of DP that do not enjoy a tigh group privacy property like epsilon delta dp
+							
+							to have matching upper and lower bounds up to the same constant, which is the case for non-private bandits but not the case for the private ones
+							
+							in adversarial bandits, there is still a big mismathc between regret upper and lower bounds
+							
+							same for contextual linear bandit when the contexts are supposed private
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Privacy Beyond Bandits</h3></header>
+                        <br>
+                        <ul>
+                            <li> Characterising optimal Membership Inference attacks, yielding new Privacy auditing tools [1]</li>
+                            <br>
+                            <li class="fragment"> Leveraging Public data in Private ERM Learning [2]</li>
+                            <br>
+                            <li class="fragment"> Optimal stopping and Prophet inequalities under Differential Privacy [3]</li>
+                        </ul>
+
+						<br>
+						<br>
+						<span class="myfootnote" style="font-size: 15px;">
+							[1] <span class="blue2">A. Azize</span>, D. Basu.
+                            <b>Some Targets Are Harder to Identify than Others: Quantifying the Target-dependent Membership Leakage</b> (AISTATS 2025, Oral)
+                            <br>
+                            [2] <span class="blue2">A. Azize</span>,  M. Tamine, B. Heymann, M. Vono, P. Loiseau, V. Perchet. <b> Mirror Descent for Private Learning with Out-of-distribution Public Data</b> (Under review)
+                            <br>
+                            [3] <span class="blue2">A. Azize</span>, M. Molina, H. Richard, V. Perchet. <b> Prophet Inequalities under Local Differential Privacy </b> (Under review)
+                        </span>    
+					
+						<aside class="notes">
+						</aside>
+                        
+
+                        <!-- <span class="r-stack">
+                        <ul>
+                            <span class="fragment" data-fragment-index="1"> <li> Characterising optimal Membership Inference attacks, yielding new Privacy auditing tools [1]</li>
+                            </span>
+                            <br>
+                            <span class="fragment" data-fragment-index="2"> <li> Leveraging Public data in Private ERM Learning [2]</li>
+                            </span>
+                            <br>
+                            <span class="fragment" data-fragment-index="3"> <li> Optimal stopping and Prophet inequalities under Differential Privacy [3]</li>
+                            </span>
+                            <br>
+                        </ul>
+                        
+						<span class="myfootnote" style="font-size: 15px;">
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+                            <br>
+							<span class="fragment" data-fragment-index="1">[1] <span class="blue2">A. Azize</span>, D. Basu.
+                            <b>Some Targets Are Harder to Identify than Others: Quantifying the Target-dependent Membership Leakage</b> (AISTATS 2025, Oral)</span>
+                            <br>
+                            <br>
+                            <span class="fragment" data-fragment-index="2">[2] <span class="blue2">A. Azize</span>,  M. Tamine, B. Heymann, M. Vono, P. Loiseau, V. Perchet. <b> Mirror Descent for Private Learning with Out-of-distribution Public Data</b> (Under review) </span>
+                            <br>
+                            <br>
+                            <span class="fragment" data-fragment-index="3">[3] <span class="blue2">A. Azize</span>, M. Molina, H. Richard, V. Perchet. <b> Prophet Inequalities under Local Differential Privacy </b> (Under review)</span>
+                        </span>     
+                        </span> -->
+                    </section>
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Privacy and Incentives</h3></header>
+                        <br>
+                        <b>Some Problems with Differential Privacy (DP):</b>
+                        <br>
+                        <ul>
+                            <li> DP = defence against all MI attacks </li>
+                            <li> How to interpret $\epsilon$? How to set $\epsilon$ practically? </li>
+                            <li class="fragment"> DP = Privacy-utility trade-offs</li>
+                        </ul>
+                        <br>
+						<br>
+
+						<span class="fragment"> <b>Game Theory to the rescue:</b> 
+                            <br>
+                            <ul>
+                                <li> Incentive Theory</li>
+                                <li> Privacy at equilibrium</li>
+                                <li> Price Discrimination and Data markets [*]</li>
+                            </ul> 
+
+                            <br>
+                            <br>
+                            <span class="myfootnote" style="font-size: 15px;">
+                                [*] <span class="blue2">A. Azize</span>, T. Gaboriaud, V. Perchet. <b> Privacy in Price Discrimination Games </b> (Work in Progress)
+                            </span>    
+                        </span>
+
+
+
+					
+						<aside class="notes">
+						</aside>
+                    </section>
+
+
+                    <section>
+                        <header><h3>Thank you!</h3></header>
+                    </section>
+                </section><!-- end of Conclusion -->
+
+				<section>
+					<section>
+						<header><h3>Appendix</h3></header>
+					</section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>View DP</h3></header>
+                        <br>
+                        <b>Definition:</b> $\pi$ satisfies $\epsilon$-View DP if $\mathcal{V}^\pi$ is $\epsilon$-DP
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 270px" height="450" data-src="images/view_dp_maths_plus.svg">
+
+                    </span>
+
+					<aside class="notes">
+						which motivates the second defintion, where the idea is to only be DP with respect to the observed rewards. so the input is a list of fixed rewards and we want the policy to recommend epislon close actions when interacting with neighbouring list of  rewards.
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 23px;">
+                        <header><h3>Interactive DP</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" data-src="images/jss_int_dp.png">
+                        
+                        <span class="theorem">
+                            Let $b \in \{L, R\}$ and $t^\star \in \{1, \dots, T\}$.
+                            <br>
+                            For $t=1,\dots, T$:
+                            <br>
+                            <ol>
+                                <li> The policy $\pi$ selects an action $$a_t \sim \pi_t(\cdot \mid a_1, r_{1}, \dots, a_{t - 1}, r_{t-1}), \, a_t \in [K]$$ </li>
+                                <li>The adversary $\mathcal{A}$ selects an adaptively chosen pair of rewards:
+                                $$ (r_t^L, r_t^R) = \mathcal{A}_t(a_1, \dots, a_t)$$
+                                <ul>
+                                    <li> If $t \neq t^\star$:
+                                    $$ r_t = r_t^L $$</li>
+                                    <li> If $t = t^\star$:
+                                    $$ r_{t^\star} = r_{t^\star}^b$$ </li>
+                                </ul>
+                                </li> 
+                                <li> The policy $\pi$ observes the reward $r_t$ </li>
+                            </ol>
+                            
+                    </span>
+                    </span>
+                    <br>
+                    <br>
+                    <span class="fragment"> A policy is Interactive DP if the View of $\mathcal{A}$ is $\approx_{\epsilon}$ for $b= L$ and $b = R$ </span>
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 23px;">
+                        <header><h3>Interactive DP</h3></header>
+                        <br>
+                        <b >Definition:</b> $\pi$ satisfies $\epsilon$-Interactive DP $\Leftrightarrow$  $\mathcal{T}^\pi$ is $\epsilon$-DP
+                        <img style="vertical-align:middle" height="450" data-src="images/tree_dp_mech.svg">
+                    
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Comments on the Definitions [$\ast$]</h3></header>
+                        <br>
+                        <ul>
+                            <li> $\pi$ is $\epsilon$-Table DP $ \Leftrightarrow $ $\pi$ is $\epsilon$-View DP $ \Leftrightarrow $ $\pi$ is $\epsilon$-Interactive DP</li> 
+                            <li class="fragment"> For approx DP: Interactive DP $\subset$ Table DP $\subset$ View DP</li>
+                        </ul>
+                        <br>
+                        <br>
+                        <br>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (SaTML 2024)
+                        </span>
+
+						<aside class="notes">
+							we show that actually these two defintions are equivalent for epsilon pure DP. 
+							for other variants of DP, table DP always implies View DP, however, the converse happens with a loss in privacy budgets;
+							
+							to adapt table and view dp for best arm identification, two changes are needed, the inputs we consider in best arm are of infinite size, since we don't know in advance when the algorithm will stop, and then the output event now contains the stopping time, the sequence of actions a_1, till a_tau and the final guess a hat; and we want that this full output to be similar when the policy interacts with two neighbouring infintie inputs.
+							
+							 finally, for the two defintion, we supposed that there is a fixed input dataset, then the policy interacts with it to produce the sequence of actions.
+							
+							It is also possible to define privacy in an interactive manner, where the input rewards are adaptively chosen by an adversary. 
+						</aside>
+                    </section>
+
+					<section data-background="white">
+						<header><h3>Interactive DP</h3></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 200px" height="500" data-src="images/interact_adv.svg">
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+						<header><h3>Regret lower bounds under $\epsilon$-DP</h3></header>
+						<br>
+						<br>
+						<table class="smallertext theorem">
+                            <tr>
+                                <th>Setting</th>  
+                                <th>Minimax</th>
+								<th>Problem Dependent</th>
+                            </tr>
+                            <tr>
+                                <td>
+									Finite-armed bandits </td>
+                                <td>
+									$\max \biggl(\frac{1}{27} \sqrt{T(K-1)}, \frac{1}{22} \frac{K-1}{\epsilon} \biggr)$
+                                </td>
+								<td>
+									$\sum_{a: \Delta_{a}>0} \frac{\Delta_{a}\log(T)}{ \min (d_a, \epsilon t_a) } $ 
+								</td>
+                            </tr>
+                            <tr>
+                                <td> Linear bandits</td>
+                                <td >
+									$\max \biggl (\frac{\exp (-2)}{8}  d\sqrt{T},  \frac{\exp (-1)}{4} \frac{d}{\epsilon}   \biggr )$
+                                </td>
+								<td>
+									$ \inf _{\alpha \in[0, \infty)^{\mathcal{A}}} \sum_{a \in \mathcal{A}} \alpha(a) \Delta_{a}\log(T) $ <br>
+									$\text { s.t. }\|a\|_{H_{\alpha}^{-1}}^{2} \leq 0.5 \Delta_a \min \left (\Delta_{a}, \epsilon \rho(\mathcal{A}) \right )$
+								</td>
+                            </tr>
+                        </table>
+						
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+                        <header><h3>Couplings and Group Privacy </h3></header>
+						<header><h3>$\rho$-zCDP </h3></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+ $$
+                        </span>
+                        <br>
+                        <br>
+                        
+ If $\mathcal{M}$ is $\rho$-zCDP, then $$\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \rho d_{\mathrm{Ham}}(d, d')^2$$
+                       
+                        <br>
+                        
+ Solve the transport problem
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ d^2_{\mathrm{Ham}}(d, d') \right]
+ $$
+                        
+                    </span>
+
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 27px;">
+                        <header><h3>Couplings and Total Variation </h3></header>
+						<header><h3>$\rho$-zCDP </h3></header>
+                        <br>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ For $\mathbb{P} =\bigotimes_{t = 1}^T \mathbb{P}_{t} $ and $\mathbb{Q} =\bigotimes_{t = 1}^T \mathbb{Q}_{t}$, using $\mathcal{C}_\infty(\mathbb{P}, \mathbb{Q}) \triangleq \bigotimes_{t = 1}^T c_\infty\left(\mathbb{P}_t, \mathbb{Q}_t\right)$:
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \rho \left( \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right) \right)^2 + \rho  \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right) \left( 1 - \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right)  \right)
+ $$
+                        </span>
+                    
+
+                    </section>
+
+
+					<section data-background="white"  style="font-size: 27px;">
+						<header><h3>Regret lower bounds under $\rho$-Interactive zCDP</h3></header>
+						<br>
+						<table class="smallertext theorem">
+                            <tr>
+                                <th></th>  
+                                <th>Minimax</th>
+                            </tr>
+                            <tr>
+                                <td>
+									Stochastic Multi-armed bandit </td>
+                                <td>
+									$\max \biggl(\frac{1}{27} \sqrt{T(K-1)}, \frac{1}{124} \sqrt{\frac{K-1}{\rho}} \biggr)$
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> Stochastic Linear bandit</td>
+                                <td >
+									$\max \biggl (\frac{\exp (-2)}{8}  d\sqrt{T},  \frac{\exp (-2.25)}{4} \frac{d}{\sqrt{\rho}}  \biggr )$
+                                </td>
+                            </tr>
+                        </table>
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+						<header><h3>AdaP-KLUCB</h3></header>
+
+						
+						$$\operatorname{I}_{a}^{\epsilon}(t_{\ell} - 1, \alpha)=  \max \left\{q \in[0,1], d\left(  \breve{\mu}_{a,\epsilon}^{\ell, \alpha}: q\right) \leq \frac{\alpha \log( t_{\ell})}{\frac{1}{2} N_a(t_\ell - 1)} \right\}$$
+						where the clipped private empirical mean is $$\breve{\mu}_{a,\epsilon}^{\ell, \alpha} = \operatorname{Clip}_{0,1} \left( \hat{\mu}_a^{\ell} + \color{blue}{\mathrm{Lap} \left( \frac{2}{\epsilon N_a(t_\ell - 1)} \right)} + \frac{\alpha \log(t_{\ell})}{ \epsilon \frac{1}{2} N_a(t_\ell - 1)  }  \right).$$
+						
+						<br>
+						
+						<b>Regret Analysis:</b>
+						$$
+							\mathrm{Reg}_{T}(\text{AdaP-KLUCB}, \nu) \leq \sum\limits_{a \colon \Delta_a > 0}\left ( \frac{C_1(\alpha) \Delta_a }{\min\{ \mathrm{kl}(\mu_a, \mu^*) , C_2 \epsilon \Delta_a\}} \log(T) + \frac{3 \alpha}{\alpha - 3} \right )
+						$$
+
+					</section>
+
+					
+
+					<section data-background="white" style="font-size: 29px;">
+						<header><h3> Joint-DP [1]</h3></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 250px" height="480" data-src="images/joint_dp.svg">
+
+						<br>
+                            <br>
+    
+                            <span class="myfootnote" style="font-size: 19px;">
+ [1] R. Shariff, O. Sheffet. <b>Differentially Private Contextual Linear Bandits </b> (NeurIPS 2018).
+                            </span>
+
+					</section>
+
+					<section  data-background="white">
+						<header><h3>Simulations</h3></header>
+						<header><h5>Other setting</h5></header>
+						<br>
+						<img style="vertical-align:middle" height="480" data-src="images/sims_mia_full.svg">
+					</section>
+				</section>
+                <!-- #
+ ################################################
+ ################################################
+ TEMPLATE
+ ################################################
+ ################################################
+ # -->
+
+
+                <!-- TABLE TEMPLATE -->
+                <!--
+ <table>
+ <tr>
+ <th></th>  
+ <th>Col 1</th>
+ <th>Col 2</th>
+ <th>Col 3</th>
+ </tr>
+ <tr>
+ <th>Blabla</th>  
+ <td>Data 1</td>
+ <td>Data 2</td>
+ <td>Data 3</td>
+ </tr>
+ </table>
+ -->
+
+                <!-- SECTION TEMPLATE -->
+                    <!--
+ <section>
+ <header><h3>My section ...</h3></header>
+ <br>
+ </section>
+ -->
+
+                <!-- TWO-COLUMN TEMPLATE -->
+                <!-- <div class="row">
+ <div class="column"></div>
+ <div class="column"></div>
+ </div> -->
+
+
+                <!-- Video -->
+                <!-- <video width="480" data-autoplay muted loop data-src="media/max_f_with_reinforce.mp4" type="video/mp4"></video> -->
+            </div>
+        </div>
+
+        
+
+        <!-- <section>
+ <header><h6>Title</h6></header>
+ <br></br>
+ <small>
+
+ </small>
+ </section>   -->
+        <!-- --------------------------------------------------------------------- -->
+        <!-- --------------------------------------------------------------------- -->
+        <!-- --------------------------------------------------------------------- -->
+
+        <script src="dist/reveal.js"></script>
+        <script src="plugin/notes/notes.js"></script>
+        <script src="plugin/search/search.js"></script>
+        <script src="plugin/highlight/highlight.js"></script>
+        <script src="plugin/math/math.js"></script>
+        <script src="plugin/zoom/zoom.js"></script>
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
+        <script>
+            // More info about initialization & config:
+            // - https://revealjs.com/initialization/
+            // - https://revealjs.com/config/
+            Reveal.initialize({
+                // I (Omar) modified default width/height. Be careful!
+                // See https://revealjs.com/presentation-size/
+                width: 1080,
+                height: 700,
+                hash: true,
+                slideNumber: true,
+                math: {
+                    mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+                    config: 'TeX-AMS_HTML-full',
+                  // pass other options into `MathJax.Hub.Config()`
+                  TeX: { Macros: {
+                      Real: "{\\mathbb{R}}",
+                      expectedvalue: "\\mathop{\\mathbb{E}}",
+                      sigmacovSA: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}}\\right| ",
+                      sigmacovS: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}'}\\right| ",
+                      epscovSA: "\\left| \\color{red}{\\mathcal{C}_{\\varepsilon}}\\right| ",
+
+ }}
+ },
+                // Learn about plugins: https://revealjs.com/plugins/
+                plugins: [ RevealSearch, RevealHighlight, RevealNotes, RevealMath, RevealZoom ]
+ });
+        </script>
+    </body>
+</html>
