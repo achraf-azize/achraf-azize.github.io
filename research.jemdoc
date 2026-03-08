@@ -6,6 +6,10 @@ Here is a full list of my publications, thesis and project reports. \n
 For published articles, visit my [ [https://scholar.google.com/citations?user=9RKFStAAAAAJ&hl=fr&oi=ao/] scholar ] page. 
 
 == Publications
+  *A. Azize*, M. Molina, H. Richard and V. Perchet, Prophet inequalities under local differential privacy. (Under Review) \n
+  *A. Azize*, M. Tamine, B. Heymann, I. Sebag, A. Betlei, C. Odic, M. Vono, P. Loiseau and V. Perchet, Mirror descent for private learning with out-of-distribution public data. (Under Review) \n
+  G. Genalti, *A. Azize* and V. Perchet. Online packet scheduling with deadlines and learning. (Under Review) \n
+  *A. Azize*, M. Jourdan, A. Al Marjani and D. Basu. Differentially private best-arm identification. (To Appear in JMLR)  \n
   M. Jourdan and *A. Azize*, Optimal Best Arm Identification under Differential Privacy. In Proc. NeurIPS2025. \n
   *A. Azize*, Y. Wu, J. Honda, F. Orabona, S. Ito and D. Basu, Optimal Regret of Bandits under Differential Privacy. In Proc. NeurIPS2025. \n
   *A. Azize* and D. Basu, Some Targets Are Harder to Identify than Others: Quantifying the Target-dependent Membership Leakage. Primary version: [https://tpdp.journalprivacyconfidentiality.org/2024/ TPDP2024] [https://arxiv.org/abs/2402.10065 arxiv]. In Proc. AISTATS2025 (*Oral*) \n
@@ -17,6 +21,13 @@ For published articles, visit my [ [https://scholar.google.com/citations?user=9R
   *A. Azize* and O. Gaizi, Conservative Optimistic Policy Optimization via Multiple Importance Sampling, [https://arxiv.org/abs/2103.03307/ arxiv]
   
 == Invited Talks and Posters
+  *2026*:
+  	
+  	  - FairPlay Seminar, Criteo, Paris. \n
+	  - TSE Seminar, Toulouse, France. \n
+	  - Mostly Monte Carlo Seminar, Parisanté Campus, Paris. \n
+          - HeKa Team Seminar, Parisanté Campus, Paris. \n
+  
   *2025*:
   
           - FairPlay Team Retreat, Fréjus, France. \n
