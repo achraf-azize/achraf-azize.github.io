@@ -1,0 +1,1593 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+        <title>Differential Privacy for Statistics and Machine Learning: Guarantees, Trade-offs, and Limits </title>
+
+        <link rel="stylesheet" href="dist/reset.css">
+        <link rel="stylesheet" href="dist/reveal.css">
+        <!-- <link rel="stylesheet" href="dist/theme/serif.css" id="theme"> -->
+        <link rel="stylesheet" href="dist/theme/indigo.css" id="theme">
+        <link rel="stylesheet" href="css/custom.css">
+
+        <!-- Theme used for syntax highlighted code -->
+        <link rel="stylesheet" href="plugin/highlight/monokai.css" id="highlight-theme">
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+
+
+                <!-- First Slide - Title, Author, Topic -->
+                <section>
+                    <section data-background="white">
+                    <header><h4 style="font-size:1.2em">
+                        Differential Privacy for Statistics and ML: Guarantees, Trade-offs, and Limits</h4></header>
+                        <br>
+                     <p class="authors" style="font-size:0.8em"> 
+                            <a href="https://achraf-azize.github.io/">Achraf Azize</a>
+                        <p class="authors" style="font-size:0.5em"> 
+     Postdoc at CREST, Ensae
+                        </p>
+                        <!-- <br>
+                        <br> -->
+                        <!-- <footer>   
+                            <img data-src="images/cv.svg" height="170">                    
+                        </footer> -->
+                        <aside class="notes">
+                        </aside>
+                        </section>
+
+                    <!-- <section data-background="white">
+                        <header><h3>Quick Intro</h3></header> -->
+                        <!-- <img style="vertical-align:middle" height="500" data-src="images/jury6.svg"> -->
+                        <!-- <br> -->
+                        <!-- <ol>
+                            <li>2025- present: Postdoc at CREST, Ensae. With: <b>Vianney Perchet</b></li>
+                            <li>2021- 2024: PhD at Scool, Inria (Lille). With: <b>Debabrota Basu</b> and <b>Philippe Preux</b>   </li>
+                            <li>2020- 2021: MVA Masters </li>
+                        </ol> -->
+						<!-- <aside class="notes">
+						</aside>
+                    </section> -->
+
+                    <section>
+                        <header><h3>Outline</h3></header>
+                        <br>
+                        <ol>
+                            <li>Inroduction to Differential Privacy</li>
+                            <li>Design: Privacy-Utility Trade-offs</li>
+                            <li>Evaluation: Privacy Attacks and Auditing</li>
+                            <li>Limiations and Future Directions </li>
+                        </ol>
+						<aside class="notes">
+						</aside>
+                    </section>
+					
+                </section>
+
+                <!-- 
+
+Inroduction to Differential Privacy
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3>Inroduction to Differential Privacy</h3></header>
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Privacy-Preserving Data Analysis</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" height="270" data-src="images/PPDA.png">
+                        
+                        <br>
+                        <span class="r-stack">
+                            <span class="fragment current-visible" data-fragment-index="1">
+                                Large collection of personal data:
+                                <br>
+                                <ul>
+                                    <li> Census</li> 
+                                    <li> Public Health</li> 
+                                    <li> Social Networks</li>
+                                </ul>
+                            </span>
+    
+                            <span class="fragment current-visible" data-fragment-index="2">
+                                Type of queries:
+                                <br>
+                                <ul>
+                                    <li> Summary statistics</li> 
+                                    <li> Training machine learning models</li> 
+                                    <li> Synthetic data</li>
+                                </ul>
+                            </span>
+    
+                            <span class="fragment current-visible" data-fragment-index="3">
+                                Two conflicting goals:
+                                <br>
+                                <ul>
+                                    <li> Answering queries <b>accurately</b> about the population</li> 
+                                    <li> Individual information stays <b>hidden</b>
+                                </ul>
+                            </span>
+
+                            <span class="fragment current-visible" data-fragment-index="4">
+                                How to define <b>"privacy"</b> formally?
+                            </span>
+
+                            <!-- <span class="fragment current-visible" data-fragment-index="5">
+                                The DP promise from curator to individuals: <br>
+
+                                <b>"Same conclusions will essentially be reached, independent of whether any individual opts into or out of the data set."</b>
+                            </span> -->
+    
+                            </span>
+
+                    </section>
+
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>First Attempt: Remove Obvious identifiers</h3></header>
+                       
+                        <img style="vertical-align:middle" height="400" data-src="images/obama.png">
+                        
+                        <div style="display: inline-block; text-align: left;">
+                            <b>Problem:</b> Not enough
+                            <ul>
+                                <li> Pseudo-identifiers (ZIP code + gender + birth charachteriese 87% of Americans)</li>
+                                <li> Access to external information sources</li>
+                            </ul>
+                        </div>
+                        
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Second Attempt: Publish aggregate statistics</h3></header>
+                       
+                        <img style="vertical-align:middle" height="400" data-src="images/aggregate.png">
+                        <br>
+
+                        <b>Problem:</b> Too many accurate statistics $\rightarrow$ data reconstruction
+                        
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Differential Privacy (DP) [1]</h3></header>
+                        <br>
+                        <br>
+                        A <b>promise</b> from a data analyst to data subjects that: <br>
+                        <br>
+
+                        "Same conclusions will essentially be reached, independent of whether any data subject opts into or out of the data set."
+
+                        <br>
+                        <br>
+                        <br>
+                        <span class="myfootnote" style="font-size: 16px;">
+                            <ul>
+								[1] C.Dwork, F.McSherry, K.Nissim, A.Smith.  
+																	<b>Calibrating noise to sensitivity in private data analysis</b>
+								(TCC 2006).
+                            </ul>
+                        </span>
+
+						
+                    </section>
+
+                    
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Differential Privacy (DP)</h3></header>
+
+                        Several Current Deployments
+                        <img style="vertical-align:middle" height="250" data-src="images/dp_dep.svg">
+
+                        <!-- <span class="fragment">
+                        <br>
+                        <b> Privacy Auditing:</b> How to certify privacy/estimate the privacy budget? 
+                        </span> -->
+                        Active Research Field
+                        <img style="vertical-align:middle" height="250" data-src="images/active_research (1).png">
+
+						<aside class="notes">
+							Differential privacy is considered the golden standard framework for privacy, with several successful implementations, at both companies and governmental agencies.
+
+							With this wide implementation of DP, it is important to be able to certify wether indeed these companies have implemented well privacy.
+						</aside>
+                    </section>
+
+
+                    
+
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Differential Privacy (DP) [1]</h3></header>
+                        <br>
+                        <b> Intuition:</b> Indistinguishability from the mass
+                        <img style="vertical-align:middle" height="270" data-src="images/dp_intuition_curve.svg">
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem">
+							$\mathcal{M}$ is $\color{blue}{\epsilon}$-DP if 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{O}, \,  \mathcal{M}_{d}(E) \leq e^{\color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+							$$
+                        </span>
+						<p > $\color{blue}{\epsilon}$: Privacy budget </p>
+                        </span>
+                        <span class="myfootnote">
+                            <ul>
+								[1] C.Dwork, F.McSherry, K.Nissim, A.Smith.  
+																	<b>Calibrating noise to sensitivity in private data analysis</b>
+								(TCC 2006).
+                            </ul>
+                        </span>
+
+						<aside class="notes">
+							To define privacy, we adhere to differential privacy as our main framework . The intuition behind differential privacy is to say that an algorithm is private if the outputs of the algorithm are similar when only the data of one user has changed.
+
+							
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 24px;">
+                        <header><h3>Comments on the DP definition</h3></header>
+                        <br>
+                        <span class="theorem"> 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{O}, \, e^{\color{blue}{-\epsilon}} \mathcal{M}_{d'}(E) \leq \mathcal{M}_{d}(E) \leq e^{\color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+							$$
+                        </span>
+                        <br>
+                        <br>
+                        <ul>
+                            <li>Smaller the <b>privacy budget</b> $\color{blue}{\epsilon}$, higher the privacy  </li>
+                            <br>
+                            <li class="fragment">
+                                A worst-case guarantee:
+                                <ul>
+                                    <li> Every possible neighbours (even very unlikely ones) </li>
+                                    <li> All possible outputs (even very unlikely ones) </li>
+                                </ul>
+                            </li>
+                            <br>
+                            <li class="fragment">
+                                This is a specific notion of closeness between $\mathcal{M}_d$ and $\mathcal{M}_{d'}$, i.e. $\sup_{d \sim d'} \mathrm{D}_\infty (\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon$,
+        $$
+            \mathrm{D}_\infty (P, Q) = \max_{x \in \mathrm{Supp}(Q)} \log \frac{P(x)}{Q(x)}
+        $$
+                                or using group privacy
+                            $$ \forall d, d': \quad  \mathrm{D}_\infty (\mathcal{M}_d, \mathcal{M}_{d'}) \leq \epsilon \, \textrm{Dham}(d, d')$$
+                            </li>
+                            
+
+                            <!-- <br>
+                            <li class="fragment">
+                                Protects against an adversary, with unlimited compute power and auxiliary information:
+                                <br>
+                                <p style="text-align: center;">
+                                $H_0$: The output was generated from $d$ <br>
+                                 vs <br>
+                                 $H_1$: The output was generated from $d'$ <br>
+                                 <br>
+                                 $\alpha + e^\color{blue}{\epsilon} \beta \geq 1$ and $\beta + e^\color{blue}{\epsilon} \alpha \geq 1$
+                                </p>
+
+                            </li> -->
+                        </ul>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 22px;">
+                        <header><h3>Comments on the DP definition</h3></header>
+                        <br>
+                        <ul>
+                            <li>
+                                Protects against an adversary, with unlimited compute power and auxiliary information:
+                                <br>
+                                <p style="text-align: center;">
+                                $H_0$: The output was generated from $d$ <br>
+                                 vs <br>
+                                 $H_1$: The output was generated from $d'$ <br>
+                                 <br>
+                                 Any test $\Leftrightarrow$ a regection region $S \subset \mathcal{O}$
+                                 <br>
+                                 Let $\alpha = \mathcal{M}_d(S)$ type I error, $\beta = \mathcal{M}_{d'}(\bar S)$ type II error, $\epsilon$-DP is equivalent to:
+                                 <br>
+                                 <br>
+                                 $\alpha + e^\color{blue}{\epsilon} \beta \geq 1$ and $\beta + e^\color{blue}{\epsilon} \alpha \geq 1$
+                                 <br>
+                                </p>
+                            </li>
+                        </ul>
+                        <span class="fragment">
+                        <img style="vertical-align:middle" height="300" data-src="images/tradeoff_priv.png">
+                        </span>
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Properties of DP</h3></header>
+                        <br>
+                        <span class="theorem"> 
+                            <b>Post-Processing.</b> If $\mathcal{M}$ is $\color{blue}{\epsilon}$-DP, and $\mathcal{F}$ is an arbitrary randomised mapping, then
+                            <br>
+                                $\mathcal{F}o\mathcal{M}$ is $\color{blue}{\epsilon}$-DP
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem"> 
+                            <b>Group privacy.</b> If $\mathcal{M}$ is $\color{blue}{\epsilon}$-DP, $d$ and $d'$ differ in $\color{red}{k}$ elements, then 
+                            $$
+                                \forall E \in \mathcal{O}, \, \mathcal{M}_d(E) \leq e^{\color{red}{k} \color{blue}{\epsilon}} \mathcal{M}_{d'}(E)
+                            $$
+                        </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem"> 
+                            <b>Basic composition.</b> If $\mathcal{M} = (\mathcal{M}_1, \dots, \mathcal{M}_T)$ is a mechanism where each $\mathcal{M}_t$ is $\color{blue}{\epsilon}_t$-DP then 
+                            <br>
+                            $\mathcal{M}$ is $\left(\sum_{t= 1}^T \color{blue}{\epsilon}_t \right)$-DP
+                        </span>
+                        </span>
+                    </section>
+                    
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>Achieving DP</h3></header>
+                        <header><h5>The Laplace Mechanism</h5></header>
+                        <br>
+                        Let $f: \mathcal{X}^n \rightarrow \mathbb{R}^d$ be a deterministic function.
+                        <br>
+                        <br>
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b>Definition.</b> The L1 sensitivity of $f$ is $$s_1(f) = \max\limits_{d \sim d'} \left \| f(d) - f(d') \right \|_1 $$
+                            </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="blue2">Theorem.</b> Let $Y_i \sim^{\text{iid}} \mathrm{Lap}\left(\frac{s_1(f)}{\color{blue}{\epsilon}}\right)$.
+                                Then $$\mathcal{M}: x \rightarrow f(x) + (Y_1, \dots, Y_d)$$ is $\color{blue}{\epsilon}$-DP
+                            </span>
+                        </span>     
+                        <br>
+                        <!-- <br>   
+                        <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="green">Example.</b> $\tilde{\mu}_n \triangleq \frac{1}{n} \sum_{i=1}^{n}x_i + \mathrm{Lap}\left ( \frac{1}{\epsilon n} \right)$ is $\epsilon$-DP, for $x_i \in [0,1]$
+                            </span>
+                        </span>                -->
+                    </section>
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>Approximate DP</h3></header>
+                        <br>
+                        <br>
+                            <span class="theorem">
+							$\mathcal{M}$ is $(\epsilon, \delta)$-DP if 
+							$$
+							\forall d\sim d', \, \forall E\in \mathcal{O}, \,  \mathcal{M}_{d}(E) \leq e^{\color{blue}{\epsilon}} \mathcal{M}_{d'}(E) + \delta
+							$$
+                        </span>
+                        <br>
+                        <br>
+                            <span class="fragment">
+                            <span class="theorem">
+							$\mathcal{M}$ is $\rho$-zero Concentrated DP if 
+							$$
+							\forall d\sim d', \, \forall \alpha > 1, \, \mathrm{D}_\alpha ( \mathcal{M}_{d},  \mathcal{M}_{d'}) \leq \alpha \rho
+							$$
+                        </span>
+                        <br>
+                        <br>
+                        where $\mathrm{D}_\alpha(P, Q) = \frac{1}{\alpha - 1} \log \mathbb{E}_Q \left[ \left( \frac{dP}{dQ} \right)^\alpha \right] $
+                        </span>
+                    </section>
+
+
+                </section>  <!-- end of Inroduction to Differential Privacy-->
+
+
+                <!-- 
+
+ Design
+
+ -->
+ <section>
+    <!-- Header  -->
+    <section>
+        <header><h3> Design: Privacy-Utility Trade-offs </h3></header>
+        
+    </section>
+
+    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Privacy-Preserving Data Analysis</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" height="270" data-src="images/PPDA.png">
+                        
+                        <br>
+                        <span class="r-stack">
+                            <span class="fragment current-visible" data-fragment-index="1">
+                                <b> Main goal: </b> Publish $\epsilon$-DP statistics, with the highest "utility"
+                                
+                            </span>
+    
+                            <span class="fragment current-visible" data-fragment-index="2">
+                                Three tasks:
+                                <br>
+                                <ul>
+                                    <li> Publishing the empirical mean</li> 
+                                    <li> Publishing the weights of a model, trained by SGD</li> 
+                                    <li> Publishing the sequence of recommended actions</li>
+                                </ul>
+                            </span>
+                    </section>
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>The Empirical Mean </h3></header>
+                        <br>
+                        <ul>
+                            <li> The mechanism:</li>
+ $$\left.\begin{matrix}
+ x_1 \\ 
+ x_2 \\ 
+ .\\ 
+ . \\
+ x_n\\ 
+ \end{matrix}\right\} \xrightarrow{\mathcal{M}^\mathrm{emp}}\hat\mu_n  \triangleq \frac{1}{n} \sum_{i = 1}^n x_i \in \mathbb{R} $$
+                        
+                            <span class="fragment"> <b>Boundness assumption:</b> all $x_i \in [0,1]$
+                            </span>
+                            <br>
+                            <br>
+                            <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="green">Privacy.</b> $\tilde{\mu}_n \triangleq \frac{1}{n} \sum_{i=1}^{n}x_i + \mathrm{Lap}\left ( \frac{1}{\epsilon n} \right)$ is $\epsilon$-DP
+                            </span>
+                            
+                            <br>
+                            <br>
+                            <span class="fragment"> 
+                            <span class="theorem"> 
+                                <b class="green">Utility.</b> If $X_i \sim^{\text{i.i.d}} P$, with mean $\mu$ then
+        $\left | \tilde{\mu}_n - \mu  \right | \leq \mathcal{O}\left(\frac{1}{\sqrt{n}} + \color{blue}{\frac{1}{\epsilon n}}\right)$
+                            </span>
+                        </span>   
+
+                        
+
+                    </section>
+
+                    <section data-background="white" style="font-size: 26px;">
+    <header><h3>Training a Model: Empirical Risk Minimization</h3></header>
+    <br>
+
+    <div style="text-align:left; width:85%; margin:auto;">
+
+        <b>Setting</b>: Given data $z_1,\dots,z_n$, choose parameters $\theta \in \mathcal C$ by minimizing
+
+        $$
+        \hat L_n(\theta)
+        \triangleq
+        \frac1n \sum_{i=1}^n \ell(\theta;z_i),
+        \qquad
+        \hat\theta_n \in \arg\min_{\theta\in\mathcal C} \hat L_n(\theta).
+        $$
+
+        <br>
+
+        <span class="fragment">
+            <b>Main goal:</b> release an $(\epsilon, \delta)$- DP model $\tilde\theta_n$ such that
+            $$
+            L(\tilde\theta_n)-L(\theta^\star)
+            \quad\text{is small,}
+            \qquad
+            L(\theta)=\mathbb E_{Z\sim P}[\ell(\theta;Z)].
+            $$
+        </span>
+
+        <br>
+
+        <span class="fragment">
+            <span class="theorem">
+                <b class="green">Main idea.</b>
+                Add noise to the gradients.
+            </span>
+        </span>
+
+    </div>
+</section>
+
+
+<section data-background="white" style="font-size: 23px;">
+    <header><h3>DP Gradient Descent / DP-SGD</h3></header>
+    <br>
+    <div style="display:flex; align-items:center; justify-content:space-around; gap:25px;">
+
+        <div style="width:48%;">
+            <img data-src="images/abadi_dp_sgd.png" style="width:100%; border:1px solid #ddd;">
+        </div>
+
+        <div style="width:48%; text-align:left;">
+
+            <span class="fragment">
+                <span class="theorem">
+                    <b class="green">Privacy.</b>
+                    With gradient clipping and Gaussian noise calibrated to the sampling rate, noise level, and number of iterations, DP-SGD is
+                    $(\epsilon,\delta)$-DP.
+                </span>
+            </span>
+
+            <br><br>
+
+            <span class="fragment">
+                <b>Convex theory:</b> assume $\ell(\cdot;z)$ is $G$-Lipschitz and $\Delta$-strongly convex.
+            </span>
+
+            <br><br>
+
+            <span class="fragment">
+                <span class="theorem">
+                    <b class="green">Utility.</b>
+                    $(\epsilon, \delta)$-DP GD achieves, up to logarithmic factors,
+                    $$
+                    \mathbb E\!\left[L(\tilde\theta)-L(\theta^\star)\right]
+                    \lesssim
+                    \frac{G^2}{\Delta n}
+                    +
+                    \color{blue}{
+                    \frac{G^2 d\log(1/\delta)}{\Delta \epsilon^2 n^2}
+                    }.
+                    $$
+                </span>
+            </span>
+
+
+             </div>
+            </div>
+        </section>
+
+        <section data-background="white">
+                        <header><h3>Multi-armed Bandits</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" height="200" data-src="images/mab.svg">
+                        <br>
+                        <ul>
+                            <li>Learner interacts with an unknown environment </li>
+                            <li>Goal: maximize rewards</li>
+                        </ul>
+                        
+						<aside class="notes">
+						</aside>
+                    </section>
+
+
+                    <section data-background="white">
+                        <header><h3>Example: Clinical trials [1]</h3></header>
+                        <br>
+                        <!-- <img style="vertical-align:middle" height="200" data-src="images/rl_example.svg"> -->
+                        <img style="vertical-align:middle" height="200" data-src="images/medicine_bandit.svg">
+                        <br>
+                        <p> For the $t$-th patient</p>
+                        <ol>
+                            <li> Doctor chooses medicine $a_t \in \{1, \dots, K\}$</li>
+                            <li> If Patient $t$ is cured $r_t = 1$, otherwise $r_t = 0$
+                        </ol>
+                        <span class="myfootnote">
+                            <ul>
+ [1] W. R. Thompson.   
+                                    <b>On the likelihood that one unknown probability exceeds another in view of the evidence of two samples</b>
+ (Biometrika 1933).
+                            </ul>
+                        </span>
+
+						<aside class="notes">
+							The canonical example of bandits is clinical trials. So, let's say we have K-candidate medicines, (look up)
+
+Bandits, first introduced by Thompson back in 1933, have been extensively studied in various forms and settings.
+						</aside>
+                    </section>
+
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Table DP</h3></header>
+                        <br>
+                        <b >Definition:</b> $\pi$ satisfies $\epsilon$-DP if $\mathcal{M}^\pi$ is $\epsilon$-DP
+                        <img height="450" data-src="images/table_dp.svg">
+                    </span>
+
+                    </section>
+
+                    
+
+                    <section data-background="white" style="font-size: 22px;">
+        <header><h3>UCB Algorithm</h3></header>
+        <header><h5>Act optimistically</h5></header>
+        <br>
+
+        At each step $t$, chose the action with highest upper confidence bound:
+        <br>
+        <span class="theorem"> 
+        $$ a_t \in \mathrm{argmax}_{a \in [K]} \mathrm{UCB}_a(t, \delta) $$
+        </span>
+        <br>
+        <br>
+        where 
+        $$ \mathrm{UCB}_a(t, \delta) \triangleq \hat \mu_a(t) +  \sqrt{\frac{\log(1/\delta)}{2 N_a(t)}}  $$
+
+        <span class="fragment">
+        <span class="horizental-align:middle">
+            <span class="theorem" style="text-align: left; font-size: 30px;">
+                <b class="blue2">Theorem. </b> For rewards in $[0,1]$, for a horizon $T$ and $\delta = 1/T^2$
+                 $$ \mathrm{Reg}_T(\mathrm{UCB}) \triangleq T \mu^\star-\mathbb{E} \left[\sum_{t=1}^{T} r_{t}\right] \leq \tilde{O}(\sqrt{KT}) $$
+            </span>
+        </span>
+        </span>
+         
+    </section>
+
+    <section data-background="white" style="font-size: 21px;">
+                        <header><h3>AdaP-UCB[$\ast$]</h3></header>
+                        <img style="vertical-align:middle" height="300" data-src="images/adap_ucb.svg">
+                        <br>
+                        <ul>
+                            <li class="fragment" data-fragment-index="1"> Compute $A_{\ell} = \operatorname{argmax}_{a} \color{blue}{\operatorname{AdaP-UCB}_{a}^{\epsilon}}(t_{\ell} )$</li>
+                            <li class="fragment" data-fragment-index="2"> Choose arm $A_{\ell}$ until round t such that $N_{A_\ell}(t) = 2N_{A_\ell}(t_{\ell} - 1)$</li>
+                            <li class="fragment" data-fragment-index="3"> Update $\color{blue}{\operatorname{AdaP-UCB}}$ using only reward samples from the last episode</li>
+                        </ul>
+                        <br>
+                        <br>
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="4">
+							<span class="theorem"  style="font-size: 20px;">
+ $$\color{blue}{\operatorname{AdaP-UCB}_{a}^{\epsilon}}(t_{\ell} ) \triangleq  \underset{\text{Non-private index}}{\underbrace{\hat{\mu}_{a}^{\ell}  + \sqrt{ \frac{ \log(t_{\ell})}{ 2\times \frac{1}{2} N_a(t_\ell) } }}} + \underset{\text{Laplace noise}}{\underbrace{\mathrm{Lap} \left( \frac{1}{\epsilon \times \frac{1}{2} N_a(t_\ell)} \right)}} +  \underset{\text{Privacy bonus}}{\underbrace{\frac{ \log( t_{\ell})}{ \epsilon \times \frac{1}{2} N_a(t_\ell )} }}$$
+</span>
+                        </span>
+                        <span class="fragment current-visible" data-fragment-index="5">
+                            <span class="theorem">
+                                <b class="blue2"> Theorem.</b> AdaP-UCB is $\epsilon$-DP for rewards in $[0,1]$ and achieves
+ $$
+ \mathrm{Reg}_{T}(\mathsf{AdaP\text{-}UCB}) \leq \tilde{O} \left(\sqrt{KT} + \color{blue}{\frac{K \log(T)}{\epsilon}} \right)
+ $$
+                            </span>
+                        </span>
+                        </span>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>When Privacy Meets Partial Information: A Refined Analysis of Differentially Private Bandits</b> (NeurIPS 2022).
+                        </span>
+                    </section>
+
+</section>
+
+
+                <!-- 
+
+ Eval
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3> Evaluation: Privacy Attacks and Auditing</h3></header>
+                    </section>
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Differential Privacy</h3></header>
+
+ Several Current Deployments
+                        <img style="vertical-align:middle" height="300" data-src="images/dp_dep.svg">
+
+                        <br>
+                        <b> Privacy Auditing:</b> How to certify privacy/estimate the privacy budget? 
+
+                    </section>
+                    
+                    <section data-background="white" style="font-size: 30px;">
+                        <header><h3>Privacy Auditing</h3></header>
+                        <header><h5> using Membership Attacks</h5></header>
+
+						<span class="r-stack">
+							<span class="fragment current-visible" data-fragment-index="1"> 
+								<b> Intuition:</b> Stronger the attack succeeds, less private is the mechanism
+							</span>
+								
+							<span class="fragment current-visible" data-fragment-index="2"> 
+								<b > Membership attacks:</b> Determine if a target datapoint $z^\star$ was in the input $d$
+								<br> 	
+								<br>
+									<img height="300" data-src="images/mia.svg">
+							</span>
+							
+
+							<span class="fragment current-visible" data-fragment-index="3"> 	
+							<img style="vertical-align:middle" height="500" data-src="images/dp_audit.svg">
+							<br>
+								<b>Main Questions:</b> How to design canaries? How to design optimal attacks?
+								
+							</span>
+							
+						</span>
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+    
+                        <header><h3>The Membership Inference Game</h3></header>
+                        <br>
+ A game between:
+                        <ul>
+                            <li class="fragment" data-fragment-index="1"> A crafter $\mathcal{C}$: entity with access to the input dataset and the mechanism $\mathcal{M}$ </li>
+                            <li class="fragment" data-fragment-index="3"> An adversary $\mathcal{A}_{z^\star}$: tries to determine whether $z^\star$ is in the input dataset</li>
+                        </ul>
+                        <br>
+                        <br>
+                        
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="2">
+                        <span class = "theorem"  style="text-align: left;">
+ The crafter $\mathcal{C}$:
+                            <br>
+                            <ul>
+                                <li> Input: $\mathcal{M}$, $n$ and $z^\star$, distribution $\mathcal{D}$ </li>
+                                <li> Builds dataset $D \sim \bigotimes_{i = 1}^n \mathcal{D}$ </li>
+                                <li> Sample $b \sim \mathrm{Ber}\left ( 1/2 \right)$ </li>
+                                <li> If $b = 1$:</li>
+                                <ul>
+                                    <li> Include $z^\star$ in $D$ at a random position </li>
+                                </ul>
+                                <li> Sample $o \sim \mathcal{M}(D)$</li>
+                                <li> Output: $(o, b)$ </li>
+                            </ul>
+                        </span>
+                    </span>
+                
+                    <span  class="fragment current-visible" data-fragment-index="4">
+                        <span class = "theorem" style="text-align: left;">
+ The adversary $\mathcal{A}_{z^\star}$:
+                            <br>
+                            <ul>
+                                <li> Input: $o \in \mathcal{O}$ </li>
+                                <li> Output: $\hat{b} \sim \mathcal{A}_{z^\star}(o)$, where $\hat{b} \in \{0,1\}$</li>
+                            </ul>
+                        </span>
+                    </span>
+
+                    <span class="fragment current-visible" data-fragment-index="5">
+                        <span class = "theorem"  style="text-align: left;">
+ The Interaction Protocol:
+                            <br>
+                            <ul>
+                                <li> Input: crafter $\mathcal{C}$, adversary $\mathcal{A}_{z^\star}$, number of rounds $T$</li>
+                                <li> For $t = 1, \dots, T$:</li>
+                                <ul>
+                                    <li> Sample $(o_t, b_t) \sim \mathcal{C}(\mathcal{M}, n, z^\star, \mathcal{D})$
+                                    <li> $\hat{b}_t \sim \mathcal{A}_{z^\star}(o_t)$ </li>
+                                </ul>
+                                <li> Output: $\left\{ \mathbb{1} \left( b_t = \hat{b}_t \right) \right\}_{t = 1}^T$ </li>
+                            </ul>
+                        </span>
+                    </span>
+                        </span>
+                        
+						<aside class="notes">
+							our membership game is between two entities
+
+							the crafter, which has access to the input dataset and to the mechainsm
+							
+							and crafts a problem for the adversary.
+							
+							The crafter starts by building a dataset D by sampling n datapoints from some datagenerating distributions 
+							
+							then they flip a fair coin b, if b = 0, nothing happens
+							
+							if b = 1, then the target z^\star is included in the input dataset at a random position and finally the output o is generated through m
+							
+							now, the adversary takes as input o and provides a guess b hat, where b hat is 1 if the adversary thinks that z^\star was inclued and 0 otherwises
+							
+							the game happens in T rounds,
+							at each round, the crafter samples an output o_t and secret bianry b_t
+							
+							only o_t is fed to the adversary, who tries to reconstruc b_t
+							
+							the adversary succeeds if b hat _t is equal to b_t
+							
+							the specificity of this formulation, is that the target z^\star is fixed throughout the game, which means that the metrics of the game will depend on  z^\star
+							
+						</aside>
+                    </section>
+    
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Performance Metrics</h3></header>
+                        <br>
+                        <ul>
+                            <li>
+ The advantage is a recentred accuracy: 
+<span class="fragment"> 
+ $$\mathrm{Adv}(\mathcal{A}_{z^\star}) \triangleq 2 \mathrm{Pr} [\mathcal{A}_{z^\star}(o) = b ] - 1$$
+</span>
+                            </li>
+                            <br>
+                            <li class="fragment">
+								The power under significance $\alpha$ is the max TPR at FPR $\alpha$: 
+<span class="fragment">						
+ $$ \mathrm{Pow}(s, \alpha) \triangleq \max_{\tau \in T_\alpha}  \mathrm{Pr} \left[s(o, z^\star) \geq \tau \mid b = 1\right] $$
+
+ for $\mathcal{A}_{s, \tau, z^\star}(o)  = \mathbb{1} \left( \underset{\text{score}}{\underbrace{s(o, z^\star)}} \geq \tau \right)$
+ where  $$T_\alpha \triangleq \left \{ \tau \in \mathbb{R}: \mathrm{Pr} \left[s(o, z^\star) \geq \tau \mid b = 0 \right] \leq \alpha \right \}$$
+</span>
+                            </li>
+                        </ul>
+
+						<aside class="notes">
+							we will study two specific metrics 
+
+							the advantage, which is just a recentred accuracy
+							
+							the power under significane alpha is the maximum true positive rate at a fixed false positive rate of alpha
+							
+							here we consider attackers which threshold over a scoring function s
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 28px;">
+                        <header><h3>Optimal Adversary</h3></header>
+                        <header><h5> The Neyman-Pearson Lemma </h5></header>
+                        <br>
+ MIG can be seen as a hypothesis test:
+                        <ul>
+                            <li> Under $H_0$, $z^\star$ was "not included", $o \sim p^\mathrm{out}(o \mid z^\star)$ </li>
+                            <li> Under $H_1$, $z^\star$ was "included", $o \sim p^\mathrm{in}(o \mid z^\star)$ </li>
+                        </ul>
+                        <br>
+                        <br>
+                        <span class="fragment">
+ Then, the log-likelihood ratio score is:
+ $$
+ \ell(o; z^\star) \triangleq \log\left( \frac{p^\mathrm{in}(o \mid z^\star)}{p^\mathrm{out}(o \mid z^\star)} \right)
+ $$
+                        </span>
+                        <span class="fragment">
+ The LR-based attacker is: $$\mathcal{A}_{\ell, \tau, z^\star}(o) = \mathbb{1} \left(\ell(o; z^\star) \geq \tau\right)$$
+                        </span>
+                        <span class="fragment">
+ The Bayes attacker is $\mathcal{A}_{\mathrm{Bayes}, z^\star} \triangleq \mathcal{A}_{\ell, 0, z^\star}$.
+                        </span>
+					
+						<aside class="notes">
+							To find the optimal adversaries, we can think of our Membership game as a hypothesis test,
+
+							where H_0 is that z^\star is not included, and in this case, we think of our output as coming from some distribution p out which is the conditional over outputs when z^\star is not included
+							
+							and under H_1, z^\star is included, and in the output comes from distribution p in which is the conditional over outputs when z^\star is included
+							
+							inspired by hypothesis test, we define the log likelihood ratio test as the log of p in divided by p out
+							
+							the lr attacker thresholds over the lr score
+							
+							and the bayes attacker is an lr attacker, but with threshold 0
+						</aside>
+			
+                    </section>
+
+                    <section data-background="white" style="font-size: 25px;">
+                        <header><h3>Leakage by the Optimal Attacker</h3></header>
+                        <br>
+                        
+                        <span class="theorem" style="text-align: left;">
+                        <b class="blue2"> Theorem.</b>
+                        <br>
+                        <ul>
+                            <li>$ \forall$ adversary $\mathcal{A}_{z^\star}$:
+ $$ \mathrm{Adv}(\mathcal{A}_{z^\star}) \leq  \mathrm{Adv}(\mathcal{A}_{\mathrm{Bayes}, z^\star}) = \mathrm{TV} \left(p^\mathrm{out}(. \mid z^\star), p^\mathrm{in}(. \mid z^\star)\right)$$ </li>
+                            <li> $ \forall$ score $s$, $\forall \alpha \in [0,1]$: 
+ $$ \mathrm{Pow}(s, \alpha) \leq  \mathrm{Pow}(\ell, \alpha)$$ </li>
+                        </ul>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <span class="theorem" style="text-align: left;">
+                        <b> Definition.</b>
+ The membership leakage of $z^\star$, for $\mathcal{M}$, under distribution $\mathcal{D}$ is
+
+ $$ 
+ \begin{align}
+ \xi(z^\star, \mathcal{M}, \mathcal{D}) &\triangleq \mathrm{Adv}(\mathcal{A}_{\mathrm{Bayes}, z^\star}) \\
+ &= \mathrm{TV} \left(p^\mathrm{out}(. \mid z^\star), p^\mathrm{in}(. \mid z^\star)\right)
+ \end{align}
+ $$
+                        </span>
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+ How to quantify $\xi(z^\star, \mathcal{M}, \mathcal{D})$?
+                        </span>
+
+						<aside class="notes">
+							a direct consequence of neyman pearson is that
+
+							the advantage of any adversary is upper bounded by the advantege of the bayes attacker, for which the exact advantage is the total varitaion between p out and p in
+							
+							and also , the power of any score s under anyy significance alpha is smaller than the power of the lr score
+							
+							inspired by this, we define the memberhsip leakage of a point z^\star as being the optimal advantage 
+							
+							this quantity tells us how easy it is to identify the presence of z^\star in some mechanism m when the data is genereated with distribution D;
+							
+							if this quantity is big, it means that z^\star is easy to identify, and would make a great canary 
+							
+							now the question, is how to quantify the leakage, since p out and p in are untractable in general
+						</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3>The Empirical Mean </h3></header>
+                        <br>
+                        <ul>
+                            <li> The mechanism:</li>
+ $$\left.\begin{matrix}
+ z_1 \in \mathbb{R}^d\\ 
+ z_2 \in \mathbb{R}^d\\ 
+ .\\ 
+ . \\
+ z_n \in \mathbb{R}^d\\ 
+ \end{matrix}\right\} \xrightarrow{\mathcal{M}^\mathrm{emp}}\hat\mu_n  \triangleq \frac{1}{n} \sum_{i = 1}^n z_i \in \mathbb{R}^d $$
+                        
+                            <li class="fragment"> Assumption on data-generating distribution $\mathcal{D}$:
+                                <ul>
+                                    <li> Column-wise independent $\mathcal{D} = \bigotimes_{j = 1}^d \mathcal{D}_j$</li>
+                                    <li> Population mean $\mu = (\mu_1, \dots, \mu_d) \in \mathbb{R}^d$ </li> 
+                                    <li> Covariance $C_\sigma = \mathrm{diag}(\sigma_1^2, \dots, \sigma_d^2) \in \mathbb{R}^{d\times d}$</li>
+                                    <li> Finite 4-th moment</li>
+                                </ul>
+                            </li> 
+                            </ul>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                            <b > Main tool:</b> Asymptotic normality, when both $n,d \rightarrow \infty$, such that $d/n = \tau$
+                        </span>
+
+						<aside class="notes">
+							so we take a step back and consider just the simple mechanism of the empirical mean.
+
+							Each datapoint is supposed to be of dimension d, and the number of points is n
+							
+							we also suppose that the columns of the dataset are independent
+							
+							the real mean is u and real covariance is C_sigma,
+							and finally the fourth moment of the distribution is supposed finite, whcih is a technical assumption needed later
+							
+							
+							the main tool we are going to use is the asymptotic normality of the mean, so when both n and d go to infinity, while the ratio, is fixed, we can asymptotically approximate p out and p in
+						</aside>
+                    </section>
+
+					<section data-background="white" style="font-size: 20px;">
+                        <header><h3> Assymptotic distribution of the LR score</h3></header>
+                        <br>
+                        <span class="theorem"   >
+                            <b class="blue2"> Theorem.</b>[$\ast$] For any $\mathcal{D}$ with finite 4-th moment, as $d,n \rightarrow \infty$ s.t. $d/n = \tau$, we show
+							<br>
+							<br>
+							<ul>
+								<li>Under $H_0$: $\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma )  \rightsquigarrow \mathcal{N}\left(-\frac{1}{2}  \color{blue}{m^\star}, \color{blue}{m^\star} \right)$ </li>
+								<br>
+								<li>Under $H_1$: $\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma )  \rightsquigarrow \mathcal{N}\left(\frac{1}{2}  \color{blue}{m^\star}, \color{blue}{m^\star} \right)$  </li>
+							</ul>
+						<br>
+						<br>
+                        </span>
+						<br>
+						 <br>
+                         $ \color{blue}{m^\star} \triangleq\lim_{n,d} \frac{1}{n} \| z^\star - \mu \|^2_{C_\sigma^{-1}} $
+                         <br>
+						 <img height="300" data-src="images/dist_lr_easy4.svg">
+                         <br>
+                         <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b> Quantifying the target-dependent Membership Leakage </b> (AISTATS 2025, oral).
+                        </span>
+
+						<aside class="notes">
+							specifically, we can get the asymptotic distribution of the lr score, which is a gaussian distribution under H_0 and H_1
+
+these likelihoods have differennt means but the same variance
+
+all characterised by m^\star, which is the lim of one over n the mahalanobis distance between the target z^\star and the datagenerating distribution
+
+so put simpling, as z^\star become more and more of an outlier, the mahalanobus distnace is bigger, the distribution are further appart and it is easier to distinguish between them
+
+
+to prove this result, we start by an edgeword expansion of the LR test
+and we show that the lr test can be approxamted by this scalar product between z^\star and hat \mu_n corrected by the inverse of the covariance matrix
+
+then we conclude using the centreal limit theorrem to get the the asymptotic distribution of the LR test
+						</aside>
+                    </section>
+
+					<section data-background="white" style="font-size: 26px;">
+                        <header><h3> Assymptotic distribution of the LR score</h3></header>
+                        <header><h5> Proof main steps:</h5></header>
+                        <br>
+                        <ul>
+                            <li>
+ Edgeworth Expansion of the LR test:
+ $$\ell_n(\hat{\mu}_n; z^\star, \mu, C_\sigma) = (z^\star - \mu)^T C_\sigma^{-1}(\hat{\mu}_n - \mu) 
+ - \frac{1}{2n} \|z^\star - \mu\|^2_{C_\sigma^{-1}} + o_p(1)$$
+                            </li>
+                            <li class="fragment">
+ Lindeberg-Feller CLT to get the asymptotic distribution of the LR test
+                            </li>
+                            
+                        </ul>
+                        <br>
+
+						<aside class="notes">
+							to prove this result, we start by an edgeword expansion of the LR test
+and we show that the lr test can be approxamted by this scalar product between z^\star and hat \mu_n corrected by the inverse of the covariance matrix
+
+then we conclude using the centreal limit theorrem to get the the asymptotic distribution of the LR test
+						</aside>
+                    </section>
+
+
+
+                    <section data-background="white" style="font-size: 26px;">
+                        <header><h3> Membership Leakage of the Mean</h3></header>
+                        <br>
+                        <span class="theorem">
+                            <b class="blue2"> Theorem.</b>[$\ast$] The asymptotic leakage of $z^\star$ in the empirical mean is:
+ $$\lim_{n,d} \xi_n(z^\star, \mathcal{M}^\mathrm{emp}_n, \mathcal{D}) = \Phi\left (\frac{\sqrt{\color{blue}{m^\star}}}{2}\right) - \Phi\left(-\frac{\sqrt{\color{blue}{m^\star}}}{2}\right)$$
+
+                            <br>
+ The optimal asymptotic power under significance $\alpha$:
+ $$\lim_{n,d} \mathrm{Pow}_n(\ell_n, \alpha, z^\star) = \Phi\left( \Phi^{-1}(\alpha) + \sqrt{\color{blue}{m^\star}}\right)$$
+                        </span>
+                         <br>
+						 <br>
+                         <ul>
+                            <li> $ \color{blue}{m^\star} \triangleq\lim_{n,d} \frac{1}{n} \| z^\star - \mu \|^2_{C_\sigma^{-1}} $</li>
+                            <li> $\Phi$ is the CDF of the standard normal distribution </li>
+                         </ul>
+                         <br>
+						 <br>
+						 <b>Proof:</b> Testing between Gaussians
+                         <br>
+						 <br>
+                         <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b> Quantifying the target-dependent Membership Leakage </b> (AISTATS 2025, oral).
+                        </span>
+					
+						<aside class="notes">
+							By charachterising the asymptotic distribution of the lr test, we can get the exact asymptotic expressions of the leakage and the power, as a function of m^\star and the cdf of gaussian distribution
+						</aside>
+                    </section>
+
+                    
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3> Membership Leakage in Different Settings</h3></header>
+                        <br>
+                        <table class="smallertext theorem">
+                            <tr>
+                                <th>Setting</th>  
+                                <th>Leakage Score</th>
+                            </tr>
+                            <tr>
+                                <td>
+ Empirical mean </td>
+                                <td>
+ $\frac{1}{n} \| z^\star - \mu \|_{C_\sigma^{-1}}^2$
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> Gaussian Noise $(\gamma > 0)$</td>
+                                <td >
+ $\frac{1}{n} \| z^\star - \mu \|_{(C_\sigma + C_{\gamma})^{-1}}^2$
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sub-sampling $(\rho < 1)$</td>
+                                <td>
+ $\frac{\rho}{n} \| z^\star - \mu \|_{C_\sigma^{-1}}^2$
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Target Misspecification</td>
+                                <td>
+ $\frac{1}{n} \left(z^\star_{\mathrm{targ}} - \mu\right)^T C_\sigma^{-1}\left(z^\star_{\mathrm{true}} - \mu \right)$
+                                </td>
+                            </tr>
+                        </table>
+						<aside class="notes">
+							We use the same techniques to get the leakage of other variant of the empirical mean mechanism like adding gaussian noise, sub sampling or target misspicication
+
+							and we show how exactly each of these variants act on the leakges
+						</aside>
+                    </section>
+
+                    <section data-background="white">
+                        <header><h3> Simulations</h3></header>
+						<header><h5> $n = 1000$, $d=5000$</h5></header>
+                        <img height="550" data-src="images/sims_mia_mean.svg">
+						
+						<aside class="notes">
+							We validate our asymptotic theoretical analysis on synthetic data
+
+							for the three settings of the empirical mean, adding noise and subsampling, 
+							we show that our power function expression tightly determines the ROC curves of the emprical results, 
+							
+							so here
+							dotted lines represent theoretical bounds while solid lines represent the
+							empirical ROC results.
+						</aside>
+                    </section>
+
+                    <section style="font-size: 27px;" data-background="white">
+                        <header><h3> Beyond Empirical Mean</h3></header>
+                        <header><h5> Gradient Descents in Federated Learning</h5></header>
+
+						<span class="fragment" data-fragment-index="1">
+                        <img height="350" data-src="images/fl_prot2.svg">
+						</span>
+
+                        <span class="r-stack">
+                        <span class="fragment current-visible" data-fragment-index="2">
+ $$\theta_{t+1} = \theta_t - \eta_t \mathcal{M}(g_{t,1}, \dots, g_{t,1}, g^\star_t)$$
+                        </span>
+
+                        <span class="fragment current-visible" data-fragment-index="3">
+                        <ul>
+                            <li>
+ Choose $g^\star_t$ as the gradient with highest estimated $\|g^\star_t - \hat{\mu}^t_0\|^2_{(\hat{C}^t_0)^{-1}} $
+                            </li>
+
+                            <li>
+ Use Covariance Attack to trace $g^\star_t$: $$(g^\star_t - \hat{\mu}^t_0)^T(\hat{C}^t_0)^{-1}\left( \frac{\theta_{t+1} - \theta_t}{\eta_t} - \hat{\mu}^t_0 \right) $$
+                            </li>
+                        </ul>
+                    </span>
+                </span>
+				<aside class="notes">
+					we also provide a simple way to apply our results beyond the empirical mean
+
+					one exciting application is auditing gradient descents in federated learning
+					
+					suppose that a server is trying to train a decentralised model theta t
+					
+					each clien have a local dataset, from which they compute a local gradient g_t
+					
+					then these client gradients are aggregated to get the next parameter theta t+1
+					
+					and in all the classic gradient descent algorithms we use, the aggregation mechanism is just some variant of the empirical mean
+					
+					these means that our results can be directly generalised to this setting
+					
+					so we suppose that the auditor is just a client in the this protocol, and wants tp know if the server is training privately the model,
+					
+					so at each step the auditor needs to determine some canary gradient g^star to send or not to the server, and then by observing the parameter at the next step, the auditor needs to trace for the presence of the canary
+					
+					our results suggest to use as canay the gradient with the highest estimated mahalabis distance and as attack the covariance attack
+				</aside>
+                    </section>
+
+                    <section data-background="white">
+                        <header><h3> Experiments</h3></header>
+                        <img height="500" data-src="images/fig_mia_exps3.svg">
+						<aside class="notes">
+							we test this new canary strategy and new score on models trained on real datasets, so FMNIST and CIFAR10, and we show that indeed the mahalanibis canaries are easier to indentify, and that the covariance score improves in the scalar product which is the score normally used in the literature.
+
+						</aside>
+                    </section>        
+
+                </section>
+                <!-- 
+
+ Limitations
+
+ -->
+                <section>
+                    <!-- Header  -->
+                    <section>
+                        <header><h3> Limitations and Future Directions</h3></header>
+                    </section>
+
+
+                    <section section data-background="white" style="font-size: 35px;">
+                        <header><h3>Recap and Future Directions</h3></header>
+                        <br>
+                        <div style="display: inline-block; text-align: left;">
+                        <b>Part 1 </b>: Privacy-Utility trade-offs in different ML settings
+                        <br> 
+                        <span class="fragment"> 
+                        <b class="green">Future directions</b>: many tasks where the price of privacy is still not well-understood, e.g. problem dependent price, beyound bounded data, linear regression
+                        </span>
+                        <br>
+                        <br>
+                        <span class="fragment">
+                        <b>Part 2</b>: Privacy Attacks and Auditing
+                        </span>
+                        <br>
+                        <span class="fragment">
+                         <b class="green">Future directions</b>: optimal attacks and canary beyond empirical mean: Z-estimators, continually updated models
+                         </span>
+                        </div>
+                    </section>
+            
+                    
+                    
+
+                    
+                   
+
+                    <section data-background="white" style="font-size: 32px;">
+                        <header><h3>Limitations of DP</h3></header>
+                        <br>
+                        <b>Some Problems with Differential Privacy:</b>
+                        <br>
+                        <ul>
+                            <li> DP = defence against all Membership Inference attacks </li>
+                            <li> How to interpret $\epsilon$? How to set $\epsilon$ practically? </li>
+                            <li> DP = Privacy-utility trade-offs</li>
+                        </ul>
+                        <br>
+						<br>
+
+						<span class="fragment"> <b>Can we fix these issues OR do we need a new paradigm ?</b> 
+                        </span>
+					
+						<aside class="notes">
+						</aside>
+                    </section>
+
+
+                    <section>
+                        <header><h3>Thank you!</h3></header>
+                    </section>
+                </section><!-- end of Conclusion -->
+
+				<section>
+					<section>
+						<header><h3>Appendix</h3></header>
+					</section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>View DP</h3></header>
+                        <br>
+                        <b>Definition:</b> $\pi$ satisfies $\epsilon$-View DP if $\mathcal{V}^\pi$ is $\epsilon$-DP
+                        <br>
+                        <img style="vertical-align:middle;margin:0px 270px" height="450" data-src="images/view_dp_maths_plus.svg">
+
+                    </span>
+
+					<aside class="notes">
+						which motivates the second defintion, where the idea is to only be DP with respect to the observed rewards. so the input is a list of fixed rewards and we want the policy to recommend epislon close actions when interacting with neighbouring list of  rewards.
+					</aside>
+                    </section>
+
+                    <section data-background="white" style="font-size: 23px;">
+                        <header><h3>Interactive DP</h3></header>
+                        <br>
+                        <img style="vertical-align:middle" data-src="images/jss_int_dp.png">
+                        
+                        <span class="theorem">
+                            Let $b \in \{L, R\}$ and $t^\star \in \{1, \dots, T\}$.
+                            <br>
+                            For $t=1,\dots, T$:
+                            <br>
+                            <ol>
+                                <li> The policy $\pi$ selects an action $$a_t \sim \pi_t(\cdot \mid a_1, r_{1}, \dots, a_{t - 1}, r_{t-1}), \, a_t \in [K]$$ </li>
+                                <li>The adversary $\mathcal{A}$ selects an adaptively chosen pair of rewards:
+                                $$ (r_t^L, r_t^R) = \mathcal{A}_t(a_1, \dots, a_t)$$
+                                <ul>
+                                    <li> If $t \neq t^\star$:
+                                    $$ r_t = r_t^L $$</li>
+                                    <li> If $t = t^\star$:
+                                    $$ r_{t^\star} = r_{t^\star}^b$$ </li>
+                                </ul>
+                                </li> 
+                                <li> The policy $\pi$ observes the reward $r_t$ </li>
+                            </ol>
+                            
+                    </span>
+                    </span>
+                    <br>
+                    <br>
+                    <span class="fragment"> A policy is Interactive DP if the View of $\mathcal{A}$ is $\approx_{\epsilon}$ for $b= L$ and $b = R$ </span>
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 23px;">
+                        <header><h3>Interactive DP</h3></header>
+                        <br>
+                        <b >Definition:</b> $\pi$ satisfies $\epsilon$-Interactive DP $\Leftrightarrow$  $\mathcal{T}^\pi$ is $\epsilon$-DP
+                        <img style="vertical-align:middle" height="450" data-src="images/tree_dp_mech.svg">
+                    
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 34px;">
+                        <header><h3>Comments on the Definitions [$\ast$]</h3></header>
+                        <br>
+                        <ul>
+                            <li> $\pi$ is $\epsilon$-Table DP $ \Leftrightarrow $ $\pi$ is $\epsilon$-View DP $ \Leftrightarrow $ $\pi$ is $\epsilon$-Interactive DP</li> 
+                            <li class="fragment"> For approx DP: Interactive DP $\subset$ Table DP $\subset$ View DP</li>
+                        </ul>
+                        <br>
+                        <br>
+                        <br>
+                        <span class="myfootnote" style="font-size: 17px;">
+ [$\ast$] <span class="blue2">A. Azize</span>, D. Basu.
+                                    <b>Concentrated Differential Privacy for Bandits</b> (SaTML 2024)
+                        </span>
+
+						<aside class="notes">
+							we show that actually these two defintions are equivalent for epsilon pure DP. 
+							for other variants of DP, table DP always implies View DP, however, the converse happens with a loss in privacy budgets;
+							
+							to adapt table and view dp for best arm identification, two changes are needed, the inputs we consider in best arm are of infinite size, since we don't know in advance when the algorithm will stop, and then the output event now contains the stopping time, the sequence of actions a_1, till a_tau and the final guess a hat; and we want that this full output to be similar when the policy interacts with two neighbouring infintie inputs.
+							
+							 finally, for the two defintion, we supposed that there is a fixed input dataset, then the policy interacts with it to produce the sequence of actions.
+							
+							It is also possible to define privacy in an interactive manner, where the input rewards are adaptively chosen by an adversary. 
+						</aside>
+                    </section>
+
+					<section data-background="white">
+						<header><h3>Interactive DP</h3></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 200px" height="500" data-src="images/interact_adv.svg">
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+						<header><h3>Regret lower bounds under $\epsilon$-DP</h3></header>
+						<br>
+						<br>
+						<table class="smallertext theorem">
+                            <tr>
+                                <th>Setting</th>  
+                                <th>Minimax</th>
+								<th>Problem Dependent</th>
+                            </tr>
+                            <tr>
+                                <td>
+									Finite-armed bandits </td>
+                                <td>
+									$\max \biggl(\frac{1}{27} \sqrt{T(K-1)}, \frac{1}{22} \frac{K-1}{\epsilon} \biggr)$
+                                </td>
+								<td>
+									$\sum_{a: \Delta_{a}>0} \frac{\Delta_{a}\log(T)}{ \min (d_a, \epsilon t_a) } $ 
+								</td>
+                            </tr>
+                            <tr>
+                                <td> Linear bandits</td>
+                                <td >
+									$\max \biggl (\frac{\exp (-2)}{8}  d\sqrt{T},  \frac{\exp (-1)}{4} \frac{d}{\epsilon}   \biggr )$
+                                </td>
+								<td>
+									$ \inf _{\alpha \in[0, \infty)^{\mathcal{A}}} \sum_{a \in \mathcal{A}} \alpha(a) \Delta_{a}\log(T) $ <br>
+									$\text { s.t. }\|a\|_{H_{\alpha}^{-1}}^{2} \leq 0.5 \Delta_a \min \left (\Delta_{a}, \epsilon \rho(\mathcal{A}) \right )$
+								</td>
+                            </tr>
+                        </table>
+						
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+                        <header><h3>Couplings and Group Privacy </h3></header>
+						<header><h3>$\rho$-zCDP </h3></header>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ \mathrm{KL}\left(\mathcal{M}_d, \mathcal{M}_{d'} \right) \right]
+ $$
+                        </span>
+                        <br>
+                        <br>
+                        
+ If $\mathcal{M}$ is $\rho$-zCDP, then $$\mathrm{KL}(\mathcal{M}_d, \mathcal{M}_{d'}) \leq \rho d_{\mathrm{Ham}}(d, d')^2$$
+                       
+                        <br>
+                        
+ Solve the transport problem
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ $$
+ \inf_{\mathcal{C} \in \Pi\left( \mathbb{P}, \mathbb{Q} \right)} \mathbb{E}_{(d, d') \sim \mathcal{C}} \left[ d^2_{\mathrm{Ham}}(d, d') \right]
+ $$
+                        
+                    </span>
+
+					
+                    </section>
+
+                    <section data-background="white" style="font-size: 27px;">
+                        <header><h3>Couplings and Total Variation </h3></header>
+						<header><h3>$\rho$-zCDP </h3></header>
+                        <br>
+                        <br>
+                        <span class="theorem" style="text-align: left;">
+ For $\mathbb{P} =\bigotimes_{t = 1}^T \mathbb{P}_{t} $ and $\mathbb{Q} =\bigotimes_{t = 1}^T \mathbb{Q}_{t}$, using $\mathcal{C}_\infty(\mathbb{P}, \mathbb{Q}) \triangleq \bigotimes_{t = 1}^T c_\infty\left(\mathbb{P}_t, \mathbb{Q}_t\right)$:
+ $$
+ \mathrm{KL}\left(M^\mathbb{P}, M^\mathbb{Q} \right) \leq \rho \left( \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right) \right)^2 + \rho  \sum_{t = 1}^T \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right) \left( 1 - \mathrm{TV}\left(\mathbb{P}_t, \mathbb{Q}_t\right)  \right)
+ $$
+                        </span>
+                    
+
+                    </section>
+
+
+					<section data-background="white"  style="font-size: 27px;">
+						<header><h3>Regret lower bounds under $\rho$-Interactive zCDP</h3></header>
+						<br>
+						<table class="smallertext theorem">
+                            <tr>
+                                <th></th>  
+                                <th>Minimax</th>
+                            </tr>
+                            <tr>
+                                <td>
+									Stochastic Multi-armed bandit </td>
+                                <td>
+									$\max \biggl(\frac{1}{27} \sqrt{T(K-1)}, \frac{1}{124} \sqrt{\frac{K-1}{\rho}} \biggr)$
+                                </td>
+                            </tr>
+                            <tr>
+                                <td> Stochastic Linear bandit</td>
+                                <td >
+									$\max \biggl (\frac{\exp (-2)}{8}  d\sqrt{T},  \frac{\exp (-2.25)}{4} \frac{d}{\sqrt{\rho}}  \biggr )$
+                                </td>
+                            </tr>
+                        </table>
+					</section>
+
+					<section data-background="white" style="font-size: 25px;">
+						<header><h3>AdaP-KLUCB</h3></header>
+
+						
+						$$\operatorname{I}_{a}^{\epsilon}(t_{\ell} - 1, \alpha)=  \max \left\{q \in[0,1], d\left(  \breve{\mu}_{a,\epsilon}^{\ell, \alpha}: q\right) \leq \frac{\alpha \log( t_{\ell})}{\frac{1}{2} N_a(t_\ell - 1)} \right\}$$
+						where the clipped private empirical mean is $$\breve{\mu}_{a,\epsilon}^{\ell, \alpha} = \operatorname{Clip}_{0,1} \left( \hat{\mu}_a^{\ell} + \color{blue}{\mathrm{Lap} \left( \frac{2}{\epsilon N_a(t_\ell - 1)} \right)} + \frac{\alpha \log(t_{\ell})}{ \epsilon \frac{1}{2} N_a(t_\ell - 1)  }  \right).$$
+						
+						<br>
+						
+						<b>Regret Analysis:</b>
+						$$
+							\mathrm{Reg}_{T}(\text{AdaP-KLUCB}, \nu) \leq \sum\limits_{a \colon \Delta_a > 0}\left ( \frac{C_1(\alpha) \Delta_a }{\min\{ \mathrm{kl}(\mu_a, \mu^*) , C_2 \epsilon \Delta_a\}} \log(T) + \frac{3 \alpha}{\alpha - 3} \right )
+						$$
+
+					</section>
+
+					
+
+					<section data-background="white" style="font-size: 29px;">
+						<header><h3> Joint-DP [1]</h3></header>
+						<br>
+						<img style="vertical-align:middle;margin:0px 250px" height="480" data-src="images/joint_dp.svg">
+
+						<br>
+                            <br>
+    
+                            <span class="myfootnote" style="font-size: 19px;">
+ [1] R. Shariff, O. Sheffet. <b>Differentially Private Contextual Linear Bandits </b> (NeurIPS 2018).
+                            </span>
+
+					</section>
+
+					<section  data-background="white">
+						<header><h3>Simulations</h3></header>
+						<header><h5>Other setting</h5></header>
+						<br>
+						<img style="vertical-align:middle" height="480" data-src="images/sims_mia_full.svg">
+					</section>
+				</section>
+                <!-- #
+ ################################################
+ ################################################
+ TEMPLATE
+ ################################################
+ ################################################
+ # -->
+
+
+                <!-- TABLE TEMPLATE -->
+                <!--
+ <table>
+ <tr>
+ <th></th>  
+ <th>Col 1</th>
+ <th>Col 2</th>
+ <th>Col 3</th>
+ </tr>
+ <tr>
+ <th>Blabla</th>  
+ <td>Data 1</td>
+ <td>Data 2</td>
+ <td>Data 3</td>
+ </tr>
+ </table>
+ -->
+
+                <!-- SECTION TEMPLATE -->
+                    <!--
+ <section>
+ <header><h3>My section ...</h3></header>
+ <br>
+ </section>
+ -->
+
+                <!-- TWO-COLUMN TEMPLATE -->
+                <!-- <div class="row">
+ <div class="column"></div>
+ <div class="column"></div>
+ </div> -->
+
+
+                <!-- Video -->
+                <!-- <video width="480" data-autoplay muted loop data-src="media/max_f_with_reinforce.mp4" type="video/mp4"></video> -->
+            </div>
+        </div>
+
+        
+
+        <!-- <section>
+ <header><h6>Title</h6></header>
+ <br></br>
+ <small>
+
+ </small>
+ </section>   -->
+        <!-- --------------------------------------------------------------------- -->
+        <!-- --------------------------------------------------------------------- -->
+        <!-- --------------------------------------------------------------------- -->
+
+        <script src="dist/reveal.js"></script>
+        <script src="plugin/notes/notes.js"></script>
+        <script src="plugin/search/search.js"></script>
+        <script src="plugin/highlight/highlight.js"></script>
+        <script src="plugin/math/math.js"></script>
+        <script src="plugin/zoom/zoom.js"></script>
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
+        <script>
+            // More info about initialization & config:
+            // - https://revealjs.com/initialization/
+            // - https://revealjs.com/config/
+            Reveal.initialize({
+                // I (Omar) modified default width/height. Be careful!
+                // See https://revealjs.com/presentation-size/
+                width: 1080,
+                height: 700,
+                hash: true,
+                slideNumber: true,
+                math: {
+                    mathjax: 'https://cdn.jsdelivr.net/gh/mathjax/mathjax@2.7.8/MathJax.js',
+                    config: 'TeX-AMS_HTML-full',
+                  // pass other options into `MathJax.Hub.Config()`
+                  TeX: { Macros: {
+                      Real: "{\\mathbb{R}}",
+                      expectedvalue: "\\mathop{\\mathbb{E}}",
+                      sigmacovSA: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}}\\right| ",
+                      sigmacovS: "\\left| \\color{red}{\\mathcal{C}_{\\sigma}'}\\right| ",
+                      epscovSA: "\\left| \\color{red}{\\mathcal{C}_{\\varepsilon}}\\right| ",
+
+ }}
+ },
+                // Learn about plugins: https://revealjs.com/plugins/
+                plugins: [ RevealSearch, RevealHighlight, RevealNotes, RevealMath, RevealZoom ]
+ });
+        </script>
+    </body>
+</html>
